@@ -381,39 +381,71 @@ async function fetchGlobalSpotPrice(symbol) {
 }
 
 async function runAnalysis() {
-  const symbol = document.getElementById('symbolInput').value.trim();
+  const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
   const timeframe = document.getElementById('timeframe').value;
   const tradeStyle = document.getElementById('tradeStyle').value;
   const marketType = document.getElementById('marketType').value;
 
+  // 1. Reset Dashboard Display Containers Safely
   document.getElementById('placeholder').style.display = 'none';
   document.getElementById('analysisResult').style.display = 'none';
   document.getElementById('metricsBar').style.display = 'none';
   document.getElementById('loadingWrap').style.display = 'flex';
-  document.getElementById('loadingText').textContent = "FETCHING REAL-TIME SYSTEM PRICES...";
+  document.getElementById('loadingText').textContent = `INITIALIZING ENGINE GRID FOR ${symbol}...`;
 
   let marketContextString = "";
 
+  // 2. Data Router Loop
   if (marketType === "Binary / Synthetic") {
+    document.getElementById('loadingText').textContent = "STREAMING DERIV REAL-TIME LEDGER DATA...";
     const candles = await fetchDerivCandles(symbol, timeframe);
-    if(candles) {
-      marketContextString = `Live Deriv Synthetic Candle Array Streams (Oldest to Newest):\n${candles.join('\n')}`;
+    if(candles && candles.length > 0) {
+      marketContextString = `Live Synthetic Candle Arrays for ${symbol} (M${timeframe}):\n${candles.join('\n')}`;
     } else {
-      marketContextString = `Deriv Asset profile: ${symbol}. Balance structure matching normal limits.`;
+      marketContextString = `Synthetic Index Tracking Frame for ${symbol}. Interval: M${timeframe}.`;
     }
   } else {
-    // Call live spot pricing pipeline
-    const liveSpot = await fetchGlobalSpotPrice(symbol);
-    const currentPriceReference = liveSpot || "4060.00"; // Fallback to current gold anchor if pricing server timeouts match
+    // Forex, Commodities, and Crypto Standard Multipliers
+    document.getElementById('loadingText').textContent = `MAPPING STRUCTURE VECTOR FOR ${symbol}...`;
     
-    marketContextString = `Asset Target Class: ${marketType} (${symbol}). Timeframe Anchor: M${timeframe}. 
-CRITICAL CURRENT LIVE SPOT PRICE: ${currentPriceReference}.
-All calculated technical target zones (Entry Zone, Stop Loss, Take Profits) MUST correlate with and be mathematically built around this exact price context layer. Do not hallucinate historical rates.`;
+    // Instead of hardcoding numbers, we instruct the model dynamically based on your precise selection
+    marketContextString = `Asset Target Ticker: ${symbol}
+Market Classification Profile: ${marketType}
+Timeframe Anchor Layout: M${timeframe}
+Active Execution Strategy Context: ${tradeStyle}
+
+INSTRUCTIONS: Evaluate the technical structure for ${symbol} on the M${timeframe} chart grid. 
+Identify major local support and resistance boundaries, structure breaks, order blocks, and high liquidity zones. 
+All generated numerical metrics (Entry Zone, Stop Loss, Take Profits) MUST align completely with the real-time global spot price tracking for ${symbol}. Do not reference any alternative assets or unrelated asset values.`;
   }
 
-  const systemInstruction = `You are TradeScope, a technical analysis engine. Return exactly ONE direct JSON response matching this schema setup. Ensure EntryZone, stopLoss, and takeProfit levels match the current numerical values provided in the prompt context:
-  {"signal":"BUY"|"SELL"|"NEUTRAL","confidence":80,"trend":"BULLISH"|"BEARISH"|"SIDEWAYS","volatility":"LOW"|"MEDIUM"|"HIGH","riskReward":"1:2","entryZone":"value","stopLoss":"value","takeProfit1":"value","takeProfit2":"value","takeProfit3":"value","marketBias":"text","priceAction":"text","keyLevels":"text","indicators":[{"name":"RSI","value":"55","signal":"NEUTRAL"}],"sessionContext":"text","tradeScenario":"text","riskWarning":"text","binaryNote":""}`;
+  // 3. System Prompt Constraints Template Configuration
+  const systemInstruction = `You are TradeScope, a precision AI technical analysis assistant. You communicate using clear, high-conviction, professional trading floor logic. 
+You must evaluate the market parameters provided and return exactly ONE valid, raw JSON block matching this structural blueprint:
+{
+  "signal": "BUY" | "SELL" | "NEUTRAL",
+  "confidence": 85,
+  "trend": "BULLISH" | "BEARISH" | "SIDEWAYS",
+  "volatility": "LOW" | "MEDIUM" | "HIGH",
+  "riskReward": "1:2 or dynamic ratio",
+  "entryZone": "Immediate logical coordinates matching the active symbol price scale",
+  "stopLoss": "Invalidation point coordinates matching the active symbol price scale",
+  "takeProfit1": "Target level 1 matching the active symbol price scale",
+  "takeProfit2": "Target level 2 matching the active symbol price scale",
+  "takeProfit3": "Target level 3 matching the active symbol price scale",
+  "marketBias": "A short, sharp statement detailing current directional pressure.",
+  "priceAction": "2 clear sentences detailing candle behavior, market inefficiencies, or structural balance shifts.",
+  "keyLevels": "Identify concrete horizontal support and resistance layers.",
+  "indicators": [
+    { "name": "Relative Strength Index (14)", "value": "Estimated structural value", "signal": "BULLISH" | "BEARISH" | "NEUTRAL" }
+  ],
+  "sessionContext": "Active volatility windows context layout.",
+  "tradeScenario": "Step by step playbook rules for trigger execution.",
+  "riskWarning": "Candid warnings about tracking errors or risk mitigation steps.",
+  "binaryNote": ""
+}`;
 
+  // 4. Send API payload via serverless connection route
   try {
     const response = await fetch('/api/analyze', {
       method: 'POST',
@@ -421,13 +453,14 @@ All calculated technical target zones (Entry Zone, Stop Loss, Take Profits) MUST
       body: JSON.stringify({ promptText: marketContextString, systemInstruction })
     });
 
-    if(!response.ok) throw new Error("Serverless API route disconnected.");
+    if(!response.ok) throw new Error(`Serverless request error. Pipeline code: ${response.status}`);
     const data = await response.json();
     const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
     
     document.getElementById('loadingWrap').style.display = 'none';
     const result = JSON.parse(rawText.trim());
     
+    // Pass the symbol along to avoid UI overlay confusion
     renderAnalysis(result, symbol, timeframe);
     updateMetrics(result);
     
@@ -435,10 +468,13 @@ All calculated technical target zones (Entry Zone, Stop Loss, Take Profits) MUST
   } catch (err) {
     document.getElementById('loadingWrap').style.display = 'none';
     document.getElementById('placeholder').style.display = 'flex';
-    document.getElementById('placeholder').innerHTML = `<div class="placeholder-icon">⚠️</div><h3>Handshake Failed</h3><p>${err.message}</p>`;
+    document.getElementById('placeholder').innerHTML = `
+      <div class="placeholder-icon">⚠️</div>
+      <h3>Handshake Vector Failure</h3>
+      <p>${err.message || 'Check your Vercel logs and API environment settings.'}</p>
+    `;
   }
 }
-
 function updateMetrics(r) {
   document.getElementById('metricsBar').style.display = 'grid';
   document.getElementById('m-signal').textContent = r.signal;
