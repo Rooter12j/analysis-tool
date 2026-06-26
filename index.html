@@ -46,13 +46,14 @@
   .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 0; }
   .section-label { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--dim); padding: 0 20px 8px; text-transform: uppercase; }
   .market-group { margin-bottom: 24px; }
-  .market-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer; border-left: 2px solid transparent; }
+  .market-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; cursor: pointer; border-left: 2px solid transparent; }
   .market-item:hover { background: rgba(255,255,255,0.03); }
   .market-item.active { background: rgba(0,229,160,0.06); border-left-color: var(--accent); }
-  .market-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .market-info { flex: 1; min-width: 0; }
+  .market-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-right: 12px; }
+  .market-info { flex: 1; min-width: 0; display: flex; align-items: center; }
   .market-symbol { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; }
-  .market-name { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .market-name { font-size: 11px; color: var(--muted); margin-left: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .market-chg { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; }
 
   .main { overflow-y: auto; display: flex; flex-direction: column; }
   .input-zone { padding: 24px 28px 0; background: var(--bg); }
@@ -71,9 +72,8 @@
   .metric-val { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
   .metric-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  /* Chart Layout Frame */
   .chart-zone { padding: 16px 28px; }
-  .chart-container { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; width: 100%; height: 380px; position: relative; overflow: hidden; }
+  .chart-container { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; width: 100%; height: 360px; overflow: hidden; }
 
   .output-zone { flex: 1; padding: 0 28px 28px; display: flex; flex-direction: column; }
   .placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--dim); text-align: center; padding: 40px; }
@@ -102,7 +102,6 @@
 
   .prose-section { display: flex; flex-direction: column; gap: 12px; }
   .prose-block { line-height: 1.6; font-size: 13px; color: var(--text); }
-  .prose-block strong { color: var(--accent); }
   
   .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .risk-item { background: var(--surface2); border-radius: 8px; padding: 12px; }
@@ -110,7 +109,6 @@
   .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 60px; }
   .loading-spinner { width: 36px; height: 36px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .history-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface2); border-radius: 6px; margin-bottom: 6px; font-size: 12px; }
   
   .bull { color: var(--bull); }
   .bear { color: var(--bear); }
@@ -122,7 +120,7 @@
 
 <header>
   <div class="logo">Trade<span>Scope</span></div>
-  <div class="header-badge">ENGINE WORKSPACE GRID</div>
+  <div class="header-badge">AI CORE ACTIVE WORKSPACE</div>
 </header>
 
 <div class="app">
@@ -130,30 +128,30 @@
     <div class="market-group">
       <div class="section-label">Forex Majors</div>
       <div class="market-item active" data-symbol="EURUSD" data-type="Forex" data-tv="FX:EURUSD">
-        <div class="market-dot" style="background:#0099FF"></div>
-        <div class="market-info"><div class="market-symbol">EUR/USD</div><div class="market-name">Euro / Dollar</div></div>
+        <div class="market-info"><div class="market-dot" style="background:#0099FF"></div><div class="market-symbol">EUR/USD</div></div>
+        <div class="market-chg bull">+0.18%</div>
       </div>
       <div class="market-item" data-symbol="GBPUSD" data-type="Forex" data-tv="FX:GBPUSD">
-        <div class="market-dot" style="background:#0099FF"></div>
-        <div class="market-info"><div class="market-symbol">GBP/USD</div><div class="market-name">Pound / Dollar</div></div>
+        <div class="market-info"><div class="market-dot" style="background:#0099FF"></div><div class="market-symbol">GBP/USD</div></div>
+        <div class="market-chg bear">-0.32%</div>
       </div>
     </div>
     <div class="market-group">
       <div class="section-label">Commodities</div>
       <div class="market-item" data-symbol="XAUUSD" data-type="Commodity" data-tv="OANDA:XAUUSD">
-        <div class="market-dot" style="background:#FFB300"></div>
-        <div class="market-info"><div class="market-symbol">XAU/USD</div><div class="market-name">Gold Spot</div></div>
+        <div class="market-info"><div class="market-dot" style="background:#FFB300"></div><div class="market-symbol">XAU/USD</div></div>
+        <div class="market-chg bull">+0.61%</div>
       </div>
     </div>
     <div class="market-group">
-      <div class="section-label">Cryptocurrency</div>
-      <div class="market-item" data-symbol="BTCUSD" data-type="Crypto" data-tv="BINANCE:BTCUSDT">
-        <div class="market-dot" style="background:#F7931A"></div>
-        <div class="market-info"><div class="market-symbol">BTC/USD</div><div class="market-name">Bitcoin Spot</div></div>
+      <div class="section-label">Binary / Synthetics</div>
+      <div class="market-item" data-symbol="Volatility 75" data-type="Binary / Synthetic" data-tv="DERIV:V75">
+        <div class="market-info"><div class="market-dot" style="background:#00E5A0"></div><div class="market-symbol">Vol 75</div></div>
+        <div class="market-chg neutral-c">±0.00%</div>
       </div>
-      <div class="market-item" data-symbol="SOLUSD" data-type="Crypto" data-tv="BINANCE:SOLUSDT">
-        <div class="market-dot" style="background:#00E5A0"></div>
-        <div class="market-info"><div class="market-symbol">SOL/USD</div><div class="market-name">Solana Spot</div></div>
+      <div class="market-item" data-symbol="Volatility 100" data-type="Binary / Synthetic" data-tv="DERIV:V100">
+        <div class="market-info"><div class="market-dot" style="background:#00E5A0"></div><div class="market-symbol">Vol 100</div></div>
+        <div class="market-chg neutral-c">±0.00%</div>
       </div>
     </div>
   </aside>
@@ -171,7 +169,6 @@
           <select id="marketType">
             <option value="Forex">Forex</option>
             <option value="Commodity">Commodity</option>
-            <option value="Crypto">Crypto</option>
             <option value="Binary / Synthetic">Binary / Synthetic</option>
           </select>
         </div>
@@ -182,7 +179,6 @@
             <option value="5">M5</option>
             <option value="15" selected>M15</option>
             <option value="60">H1</option>
-            <option value="240">H4</option>
           </select>
         </div>
         <div class="field-group">
@@ -190,7 +186,6 @@
           <select id="tradeStyle">
             <option value="scalping">Scalping</option>
             <option value="day trading" selected>Day Trading</option>
-            <option value="swing trading">Swing Trading</option>
           </select>
         </div>
         <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">⚡ Analyze</button>
@@ -198,31 +193,11 @@
     </div>
 
     <div class="metrics-bar" id="metricsBar" style="display:none">
-      <div class="metric-card">
-        <div class="metric-label">Signal</div>
-        <div class="metric-val" id="m-signal">—</div>
-        <div class="metric-sub">Direction Matrix</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Confidence</div>
-        <div class="metric-val" id="m-conf">—</div>
-        <div class="metric-sub">Statistical certainty</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Structure</div>
-        <div class="metric-val" id="m-trend">—</div>
-        <div class="metric-sub">Order Profile</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Volatility</div>
-        <div class="metric-val" id="m-vol">—</div>
-        <div class="metric-sub">ATR Spectrum</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-label">Risk/Reward</div>
-        <div class="metric-val" id="m-rr">—</div>
-        <div class="metric-sub">Profile Plan</div>
-      </div>
+      <div class="metric-card"><div class="metric-label">Signal</div><div class="metric-val" id="m-signal">—</div></div>
+      <div class="metric-card"><div class="metric-label">Confidence</div><div class="metric-val" id="m-conf">—</div></div>
+      <div class="metric-card"><div class="metric-label">Structure</div><div class="metric-val" id="m-trend">—</div></div>
+      <div class="metric-card"><div class="metric-label">Volatility</div><div class="metric-val" id="m-vol">—</div></div>
+      <div class="metric-card"><div class="metric-label">Risk/Reward</div><div class="metric-val" id="m-rr">—</div></div>
     </div>
 
     <div class="chart-zone">
@@ -230,15 +205,11 @@
     </div>
 
     <div class="output-zone">
-      <div class="placeholder" id="placeholder">
-        <h3>Awaiting Execution parameters...</h3>
-      </div>
-
+      <div class="placeholder" id="placeholder"><h3>Select a market parameters baseline...</h3></div>
       <div class="loading-wrap" id="loadingWrap" style="display:none">
         <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">SYNCING INTEGRATED PRICE DATA MATRIX...</div>
+        <div class="loading-text" id="loadingText">SYNCING PRICE DATA MATRIX...</div>
       </div>
-
       <div id="analysisResult" style="display:none" class="analysis-wrap"></div>
     </div>
   </main>
@@ -248,23 +219,12 @@
 let activeTvTicker = "FX:EURUSD";
 let analysisHistory = [];
 
-const loadingMessages = [
-  'FETCHING LIVE SPOT RATE CALCULATIONS...',
-  'DECRYPTING CHART MATRIX VALUES...',
-  'CALCULATING INTRADAY LIQUIDITY POOLS...',
-  'COMPILING PREDICTIVE TARGET METRICS...'
-];
+window.addEventListener('DOMContentLoaded', () => { renderTradingViewWidget(); });
 
-window.addEventListener('DOMContentLoaded', () => {
-  renderTradingViewWidget();
-});
-
-// Sidebar Event Listeners Map Setup
 document.querySelectorAll('.market-item').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.market-item').forEach(i => i.classList.remove('active'));
     item.classList.add('active');
-    
     document.getElementById('symbolInput').value = item.dataset.symbol;
     document.getElementById('marketType').value = item.dataset.type;
     activeTvTicker = item.dataset.tv;
@@ -274,39 +234,26 @@ document.querySelectorAll('.market-item').forEach(item => {
 
 function renderTradingViewWidget() {
   const tf = document.getElementById('timeframe').value;
-  document.getElementById('chartWorkspace').innerHTML = `<div id="tv_iframe_target" style="height:100%"></div>`;
-  
+  document.getElementById('chartWorkspace').innerHTML = `<div id="tv_iframe" style="height:100%"></div>`;
   new TradingView.widget({
-    "autosize": true,
-    "symbol": activeTvTicker,
-    "interval": tf,
-    "timezone": "Etc/UTC",
-    "theme": "dark",
-    "style": "1",
-    "locale": "en",
-    "container_id": "tv_iframe_target",
-    "hide_side_toolbar": false,
-    "allow_symbol_change": true,
-    "studies": ["RSI@tv-basicstudies"]
+    "autosize": true, "symbol": activeTvTicker, "interval": tf,
+    "timezone": "Etc/UTC", "theme": "dark", "style": "1", "locale": "en",
+    "container_id": "tv_iframe", "hide_side_toolbar": false, "allow_symbol_change": true
   });
 }
 
 async function fetchCurrentMarketPrice(symbol, marketType) {
-  let cleanSymbol = symbol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-  if (marketType === 'Forex' || cleanSymbol === 'EURUSD' || cleanSymbol === 'GBPUSD') {
-    try {
-      const res = await fetch(`https://open.er-api.com/v6/latest/USD`).then(r => r.json());
-      if (cleanSymbol === 'EURUSD' && res.rates?.EUR) return (1 / res.rates.EUR).toFixed(4);
-      if (cleanSymbol === 'GBPUSD' && res.rates?.GBP) return (1 / res.rates.GBP).toFixed(4);
-    } catch (e) {}
-  }
-  if (cleanSymbol === 'XAUUSD' || cleanSymbol === 'GOLD') cleanSymbol = 'PAXGUSDT';
-  if (cleanSymbol === 'BTCUSD') cleanSymbol = 'BTCUSDT';
-  if (cleanSymbol === 'SOLUSD') cleanSymbol = 'SOLUSDT';
-
+  let clean = symbol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   try {
-    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cleanSymbol}`).then(r => r.json());
-    if (res.price) return parseFloat(res.price).toFixed(2);
+    if (clean === 'EURUSD' || clean === 'GBPUSD') {
+      const res = await fetch(`https://open.er-api.com/v6/latest/USD`).then(r => r.json());
+      if (clean === 'EURUSD') return (1 / res.rates.EUR).toFixed(5);
+      if (clean === 'GBPUSD') return (1 / res.rates.GBP).toFixed(5);
+    }
+    if (clean === 'XAUUSD') {
+      const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT`).then(r => r.json());
+      return parseFloat(res.price).toFixed(2);
+    }
   } catch (e) {}
   return null;
 }
@@ -314,7 +261,7 @@ async function fetchCurrentMarketPrice(symbol, marketType) {
 function safeParseJSON(text) {
   try { return JSON.parse(text); } catch (_) {}
   const start = text.indexOf('{');
-  if (start === -1) throw new Error('No valid payload detected.');
+  if (start === -1) throw new Error('No valid response data structure found.');
   return JSON.parse(text.slice(start));
 }
 
@@ -332,71 +279,60 @@ async function runAnalysis() {
   document.getElementById('metricsBar').style.display = 'none';
   document.getElementById('loadingWrap').style.display = 'flex';
 
-  let msgIdx = 0;
-  const msgInterval = setInterval(() => {
-    msgIdx = (msgIdx + 1) % loadingMessages.length;
-    document.getElementById('loadingText').textContent = loadingMessages[msgIdx];
-  }, 900);
-
   const livePrice = await fetchCurrentMarketPrice(symbol, marketType);
-  let priceContextString = "";
-  
+  let pricePromptModifier = "";
   if (livePrice) {
-    priceContextString = `CRITICAL LIVE DATA: The asset is currently trading precisely at: ${livePrice}.\nAll targets, support/resistance zones, stop loss points, and entries MUST be calculated relative to this active market price baseline. Do not use historical baselines.`;
-  } else {
-    priceContextString = `Note: Process technical constraints using realistic values based on global scaling fields.`;
+    pricePromptModifier = `CRITICAL REALTIME baseline: The actual live current market price is exactly: ${livePrice}. Calculate your Entry Zones, Stop Loss, and Take Profits dynamically strictly relative to this price right now.`;
   }
 
-  const systemPrompt = `You are TradeScope, an expert AI trading terminal. Respond ONLY with a single raw valid JSON block and nothing else.
-  JSON Schema Layout:
-  {"signal":"BUY"|"SELL"|"NEUTRAL","confidence":85,"trend":"BULLISH"|"BEARISH"|"SIDEWAYS","volatility":"LOW"|"MEDIUM"|"HIGH","riskReward":"1:2","entryZone":"value","stopLoss":"value","takeProfit1":"value","takeProfit2":"value","takeProfit3":"value","marketBias":"text","priceAction":"text","keyLevels":"text","indicators":[{"name":"RSI","value":"45","signal":"NEUTRAL"}],"sessionContext":"text","tradeScenario":"text","riskWarning":"text","binaryNote":""}`;
+  const systemPrompt = `You are TradeScope. Respond ONLY with a single raw valid JSON block and nothing else. No markdown backticks.
+  Schema: {"signal":"BUY"|"SELL"|"NEUTRAL","confidence":80,"trend":"BULLISH"|"BEARISH","volatility":"HIGH"|"LOW","riskReward":"1:2","entryZone":"value","stopLoss":"value","takeProfit1":"value","takeProfit2":"value","takeProfit3":"value","marketBias":"text","priceAction":"text","keyLevels":"text","indicators":[]}`;
 
-  const userPrompt = `Analyze ${symbol} (${marketType}) on the M${timeframe} chart grid for a ${tradeStyle} position strategy setup.
-  ${priceContextString}
-  Ensure numerical coordinates fit standard decimal places for this asset.`;
+  const userPrompt = `Analyze ${symbol} (${marketType}) on M${timeframe} timeframe for ${tradeStyle}. ${pricePromptModifier}`;
 
   try {
-    const response = await fetch('/api/analyze', {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ promptText: userPrompt, systemInstruction: systemPrompt })
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6', max_tokens: 2000,
+        system: systemPrompt, messages: [{ role: 'user', content: userPrompt }]
+      })
     });
 
     const data = await response.json();
-    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const raw = data.content?.[0]?.text || '{}';
     const clean = raw.replace(/```json|```/g, '').trim();
     const result = safeParseJSON(clean);
 
-    clearInterval(msgInterval);
     document.getElementById('loadingWrap').style.display = 'none';
-
-    renderAnalysis(result, symbol, marketType, timeframe);
+    renderAnalysis(result, symbol);
     updateMetrics(result);
 
-    analysisHistory.unshift({ symbol, direction: r.signal, time: new Date().toLocaleTimeString() });
+    // FIX: Changed from r.signal to result.signal
+    analysisHistory.unshift({ symbol, direction: result.signal, time: new Date().toLocaleTimeString() });
 
   } catch (err) {
-    clearInterval(msgInterval);
     document.getElementById('loadingWrap').style.display = 'none';
     document.getElementById('placeholder').style.display = 'flex';
-    document.getElementById('placeholder').innerHTML = `<h3>Analysis Pipeline Error</h3><p>${err.message}</p>`;
+    document.getElementById('placeholder').innerHTML = `<h3>Pipeline Exception Raised</h3><p>${err.message}</p>`;
   }
   btn.disabled = false;
 }
 
-function updateMetrics(r) {
+function updateMetrics(result) {
   document.getElementById('metricsBar').style.display = 'grid';
-  document.getElementById('m-signal').textContent = r.signal;
-  document.getElementById('m-signal').className = 'metric-val ' + (r.signal === 'BUY' ? 'bull' : r.signal === 'SELL' ? 'bear' : 'neutral-c');
-  document.getElementById('m-conf').textContent = r.confidence + '%';
-  document.getElementById('m-trend').textContent = r.trend;
-  document.getElementById('m-vol').textContent = r.volatility;
-  document.getElementById('m-rr').textContent = r.riskReward;
+  document.getElementById('m-signal').textContent = result.signal;
+  document.getElementById('m-signal').className = 'metric-val ' + (result.signal === 'BUY' ? 'bull' : result.signal === 'SELL' ? 'bear' : 'neutral-c');
+  document.getElementById('m-conf').textContent = result.confidence + '%';
+  document.getElementById('m-trend').textContent = result.trend;
+  document.getElementById('m-vol').textContent = result.volatility;
+  document.getElementById('m-rr').textContent = result.riskReward;
 }
 
-function renderAnalysis(r, symbol, marketType, tf) {
-  const sc = r.signal === 'BUY' ? 'bull' : r.signal === 'SELL' ? 'bear' : 'neutral-c';
-  const sBg = r.signal === 'BUY' ? 'bull-bg' : r.signal === 'SELL' ? 'bear-bg' : 'neutral-bg';
+function renderAnalysis(result, symbol) {
+  const sc = result.signal === 'BUY' ? 'bull' : result.signal === 'SELL' ? 'bear' : 'neutral-c';
+  const sBg = result.signal === 'BUY' ? 'bull-bg' : result.signal === 'SELL' ? 'bear-bg' : 'neutral-bg';
 
   document.getElementById('analysisResult').innerHTML = `
     <div class="analysis-left">
@@ -404,47 +340,33 @@ function renderAnalysis(r, symbol, marketType, tf) {
         <div class="signal-big">
           <div class="signal-icon ${sBg}">📊</div>
           <div style="flex:1">
-            <div class="signal-direction ${sc}">${r.signal}</div>
-            <div class="prose-block" style="color:var(--muted); margin-top:4px">${r.marketBias}</div>
-            <div class="confidence-bar"><div class="confidence-fill" style="width:${r.confidence}%; background:var(--accent)"></div></div>
+            <div class="signal-direction ${sc}">${result.signal}</div>
+            <div class="prose-block" style="color:var(--muted); margin-top:4px">${result.marketBias}</div>
           </div>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-header"><div class="card-title">🎯 Target Coordinates Matrix</div></div>
+        <div class="card-header"><div class="card-title">🎯 Coordinate Strategy Matrix</div></div>
         <div class="card-body">
           <div class="levels-grid">
-            <div class="level-box"><div class="level-tag">Entry Zone</div><div class="level-price">${r.entryZone}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bear)">Stop Loss</div><div class="level-price" style="color:var(--bear)">${r.stopLoss}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bull)">Take Profit 1</div><div class="level-price" style="color:var(--bull)">${r.takeProfit1}</div></div>
+            <div class="level-box"><div class="level-tag">Entry Zone</div><div class="level-price">${result.entryZone}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bear)">Stop Loss</div><div class="level-price" style="color:var(--bear)">${result.stopLoss}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 1</div><div class="level-price" style="color:var(--bull)">${result.takeProfit1}</div></div>
           </div>
           <div class="levels-grid-secondary">
-            <div class="level-box"><div class="level-tag" style="color:var(--bull)">Take Profit 2</div><div class="level-price" style="color:var(--bull)">${r.takeProfit2}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bull)">Take Profit 3</div><div class="level-price" style="color:var(--bull)">${r.takeProfit3}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--accent2)">R:R Plan</div><div class="level-price" style="color:var(--accent2)">${r.riskReward}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 2</div><div class="level-price" style="color:var(--bull)">${result.takeProfit2}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 3</div><div class="level-price" style="color:var(--bull)">${result.takeProfit3}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--accent2)">R:R Plan</div><div class="level-price" style="color:var(--accent2)">${result.riskReward}</div></div>
           </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header"><div class="card-title">📖 Narrative Breakdown Matrix</div></div>
-        <div class="card-body prose-section">
-          <div class="prose-block"><strong>Price Action:</strong> ${r.priceAction}</div>
-          <div class="prose-block"><strong>Key Structural Levels:</strong> ${r.keyLevels}</div>
-          <div class="prose-block"><strong>Scenario Execution Roadmap:</strong> ${r.tradeScenario}</div>
         </div>
       </div>
     </div>
-
     <div class="analysis-right">
       <div class="card">
-        <div class="card-header"><div class="card-title">🛡️ Risk Parameters</div></div>
-        <div class="card-body">
-          <div class="risk-grid">
-            <div class="risk-item"><div class="level-tag">Trend State</div><div>${r.trend}</div></div>
-            <div class="risk-item"><div class="level-tag">Volatility Index</div><div>${r.volatility}</div></div>
-          </div>
+        <div class="card-header"><div class="card-title">📖 Structural Profile</div></div>
+        <div class="card-body prose-section">
+          <div class="prose-block"><strong>Price Action:</strong> ${result.priceAction}</div>
+          <div class="prose-block"><strong>Key Levels:</strong> ${result.keyLevels}</div>
         </div>
       </div>
     </div>
