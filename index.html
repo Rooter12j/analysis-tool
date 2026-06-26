@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradeScope — AI Market Analysis Workspace</title>
+<title>TradeScope — AI Market Analysis</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500&display=swap');
 
@@ -26,514 +26,900 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; min-height: 100vh; }
 
-  header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 28px; border-bottom: 1px solid var(--border);
-    background: var(--surface); position: sticky; top: 0; z-index: 100;
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    min-height: 100vh;
   }
-  .logo { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.5px; }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 28px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: -0.5px;
+    color: var(--text);
+  }
   .logo span { color: var(--accent); }
   .header-badge {
-    font-family: 'Space Mono', monospace; font-size: 10px; color: var(--accent);
-    background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2);
-    border-radius: 4px; padding: 2px 8px; letter-spacing: 1px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    background: rgba(0,229,160,0.08);
+    border: 1px solid rgba(0,229,160,0.2);
+    border-radius: 4px;
+    padding: 2px 8px;
+    letter-spacing: 1px;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
   }
 
-  .app { display: grid; grid-template-columns: 280px 1fr; height: calc(100vh - 53px); }
+  /* ── LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: calc(100vh - 53px);
+  }
 
-  .sidebar { background: var(--surface); border-right: 1px solid var(--border); overflow-y: auto; padding: 20px 0; }
-  .section-label { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--dim); padding: 0 20px 8px; text-transform: uppercase; }
+  /* ── SIDEBAR ── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .sidebar::-webkit-scrollbar { width: 4px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+  .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--dim);
+    padding: 0 20px 8px;
+    text-transform: uppercase;
+  }
+
   .market-group { margin-bottom: 24px; }
-  .market-item { display: flex; align-items: center; gap: 12px; padding: 10px 20px; cursor: pointer; border-left: 2px solid transparent; }
+
+  .market-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-left: 2px solid transparent;
+  }
   .market-item:hover { background: rgba(255,255,255,0.03); }
-  .market-item.active { background: rgba(0,229,160,0.06); border-left-color: var(--accent); }
-  .market-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .market-item.active {
+    background: rgba(0,229,160,0.06);
+    border-left-color: var(--accent);
+  }
+  .market-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
   .market-info { flex: 1; min-width: 0; }
-  .market-symbol { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; }
-  .market-chg { font-family: 'Space Mono', monospace; font-size: 11px; font-weight: 700; }
+  .market-symbol {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .market-name {
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .market-chg {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+  }
   .bull { color: var(--bull); }
   .bear { color: var(--bear); }
   .neutral-c { color: var(--neutral); }
 
-  .main { overflow-y: auto; display: flex; flex-direction: column; }
-  .input-zone { padding: 24px 28px 0; background: var(--bg); }
-  .input-label { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; }
-  .input-row { display: grid; grid-template-columns: 1.2fr 1fr 1fr 1fr 1fr auto; gap: 10px; align-items: end; }
-  .field-group { display: flex; flex-direction: column; gap: 6px; }
-  .field-group label { font-size: 11px; color: var(--muted); font-family: 'Space Mono', monospace; }
-  select, input { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: 6px; padding: 9px 12px; font-size: 13px; font-family: 'Space Grotesk', sans-serif; width: 100%; outline: none; }
-  
-  .btn-analyze { background: var(--accent); color: #0A0C10; border: none; border-radius: 6px; padding: 10px 20px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; }
+  /* ── MAIN ── */
+  .main {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .main::-webkit-scrollbar { width: 4px; }
+  .main::-webkit-scrollbar-track { background: transparent; }
+  .main::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
-  .metrics-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; padding: 16px 28px; }
-  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; }
-  .metric-label { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; margin-bottom: 6px; }
-  .metric-val { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+  /* ── INPUT AREA ── */
+  .input-zone {
+    padding: 24px 28px 0;
+    background: var(--bg);
+  }
+  .input-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .input-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
+    gap: 10px;
+    align-items: end;
+  }
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-group label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 0.5px;
+  }
+  select, input[type="text"], input[type="number"] {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: 'Space Grotesk', sans-serif;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  select:focus, input:focus { border-color: var(--accent2); }
+  option { background: var(--surface2); }
+
+  .btn-analyze {
+    background: var(--accent);
+    color: #0A0C10;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .btn-analyze:hover { opacity: 0.88; }
+  .btn-analyze:active { transform: scale(0.98); }
+  .btn-analyze:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── QUICK METRICS ── */
+  .metrics-bar {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+    padding: 16px 28px;
+  }
+  .metric-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .metric-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .metric-val {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1;
+  }
   .metric-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-  .chart-zone { padding: 0 28px 16px; height: 420px; min-height: 420px; }
-  .chart-container { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; width: 100%; height: 100%; overflow: hidden; }
+  /* ── OUTPUT AREA ── */
+  .output-zone {
+    flex: 1;
+    padding: 0 28px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
 
-  .output-zone { flex: 1; padding: 0 28px 28px; display: flex; flex-direction: column; }
-  .placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; color: var(--dim); text-align: center; padding: 40px; }
-  .placeholder-icon { font-size: 32px; }
-  
-  .analysis-wrap { display: grid; grid-template-columns: 1fr 340px; gap: 16px; }
-  .analysis-left, .analysis-right { display: flex; flex-direction: column; gap: 14px; }
-  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .card-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.01); }
-  .card-title { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; }
+  /* placeholder */
+  .placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    color: var(--dim);
+    text-align: center;
+    padding: 60px 40px;
+  }
+  .placeholder-icon {
+    width: 60px; height: 60px;
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 4px;
+  }
+  .placeholder h3 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; color: var(--muted); }
+  .placeholder p { font-size: 13px; color: var(--dim); max-width: 340px; line-height: 1.6; }
+
+  /* ANALYSIS OUTPUT */
+  .analysis-wrap {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    animation: fadeIn 0.4s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  .analysis-left { display: flex; flex-direction: column; gap: 14px; }
+  .analysis-right { display: flex; flex-direction: column; gap: 14px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.01);
+  }
+  .card-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
   .card-body { padding: 16px; }
 
-  .signal-big { display: flex; align-items: center; gap: 20px; padding: 20px; }
-  .signal-icon { width: 54px; height: 54px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-  .bull-bg { background: rgba(0,201,122,0.12); border: 1px solid rgba(0,201,122,0.2); }
-  .bear-bg { background: rgba(255,77,106,0.12); border: 1px solid rgba(255,77,106,0.2); }
-  .neutral-bg { background: rgba(255,179,0,0.12); border: 1px solid rgba(255,179,0,0.2); }
-  
-  .confidence-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
-  .confidence-fill { height: 100%; width: 0%; transition: width 0.8s ease; }
+  /* SIGNAL BADGE */
+  .signal-big {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  .signal-icon {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    flex-shrink: 0;
+  }
+  .signal-icon.bull-bg { background: rgba(0,201,122,0.15); border: 1px solid rgba(0,201,122,0.3); }
+  .signal-icon.bear-bg { background: rgba(255,77,106,0.15); border: 1px solid rgba(255,77,106,0.3); }
+  .signal-icon.neutral-bg { background: rgba(255,179,0,0.15); border: 1px solid rgba(255,179,0,0.3); }
+  .signal-text { flex: 1; }
+  .signal-direction {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .signal-sub { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+  .confidence-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 10px;
+    overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 1s ease;
+  }
 
-  .levels-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .level-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center; }
-  .level-tag { font-family: 'Space Mono', monospace; font-size: 9px; text-transform: uppercase; margin-bottom: 4px; }
-  .level-price { font-family: 'Space Mono', monospace; font-size: 14px; font-weight: 700; }
+  /* LEVELS TABLE */
+  .levels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .level-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+  }
+  .level-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .level-price {
+    font-family: 'Space Mono', monospace;
+    font-size: 15px;
+    font-weight: 700;
+  }
 
+  /* PROSE ANALYSIS */
   .prose-section { display: flex; flex-direction: column; gap: 12px; }
-  .prose-block { line-height: 1.6; font-size: 13px; color: var(--text); }
-  
-  .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .risk-item { background: var(--surface2); border-radius: 8px; padding: 12px; }
+  .prose-block { line-height: 1.7; font-size: 13.5px; color: var(--text); }
+  .prose-block strong { color: var(--accent); font-weight: 600; }
 
-  .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: 60px; }
-  .loading-spinner { width: 36px; height: 36px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  /* INDICATORS */
+  .indicator-list { display: flex; flex-direction: column; gap: 8px; }
+  .indicator-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 6px;
+  }
+  .ind-name { font-size: 12px; color: var(--muted); }
+  .ind-val { font-family: 'Space Mono', monospace; font-size: 12px; font-weight: 700; }
+  .ind-signal {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .sig-bull { background: rgba(0,201,122,0.15); color: var(--bull); }
+  .sig-bear { background: rgba(255,77,106,0.15); color: var(--bear); }
+  .sig-neu  { background: rgba(255,179,0,0.12); color: var(--neutral); }
+
+  /* RISK BOX */
+  .risk-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .risk-item {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .risk-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; }
+  .risk-val { font-family: 'Space Mono', monospace; font-size: 16px; font-weight: 700; }
+
+  /* LOADING */
+  .loading-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 60px;
+  }
+  .loading-spinner {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .history-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; background: var(--surface2); border-radius: 6px; margin-bottom: 6px; font-size: 12px; }
+  .loading-text {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  /* HISTORY */
+  .history-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .history-item:hover { background: var(--border); }
+  .h-sym { font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 13px; }
+  .h-dir { font-size: 11px; }
+  .h-time { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--dim); margin-left: auto; }
+
+  /* RESPONSIVE clamp on very small */
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .input-row { grid-template-columns: 1fr 1fr; }
+    .analysis-wrap { grid-template-columns: 1fr; }
+    .metrics-bar { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 </style>
-<script src="https://s3.tradingview.com/tv.js"></script>
 </head>
 <body>
 
 <header>
   <div class="logo">Trade<span>Scope</span></div>
-  <div class="header-badge">LIVE COMPANION ENGINE</div>
+  <div class="header-badge">AI ANALYSIS ENGINE</div>
+  <div class="header-right">
+    <span style="font-size:11px;color:var(--muted)">Powered by Gemini AI</span>
+    <div style="width:8px;height:8px;border-radius:50%;background:var(--bull);box-shadow:0 0 6px var(--bull)"></div>
+  </div>
 </header>
 
 <div class="app">
-  <aside class="sidebar" id="sidebarList"></aside>
+
+  <aside class="sidebar">
+    <div class="market-group">
+      <div class="section-label">Forex Majors</div>
+      <div class="market-item active" data-symbol="EURUSD" data-type="Forex" data-name="Euro / US Dollar">
+        <div class="market-dot" style="background:#0099FF"></div>
+        <div class="market-info"><div class="market-symbol">EUR/USD</div><div class="market-name">Euro / US Dollar</div></div>
+        <div class="market-chg bull">Live</div>
+      </div>
+      <div class="market-item" data-symbol="GBPUSD" data-type="Forex" data-name="British Pound / US Dollar">
+        <div class="market-dot" style="background:#0099FF"></div>
+        <div class="market-info"><div class="market-symbol">GBP/USD</div><div class="market-name">British Pound / USD</div></div>
+        <div class="market-chg bear">Live</div>
+      </div>
+    </div>
+
+    <div class="market-group">
+      <div class="section-label">Commodities</div>
+      <div class="market-item" data-symbol="XAUUSD" data-type="Commodity" data-name="Gold / US Dollar">
+        <div class="market-dot" style="background:#FFB300"></div>
+        <div class="market-info"><div class="market-symbol">XAU/USD</div><div class="market-name">Gold Spot</div></div>
+        <div class="market-chg bull">Live</div>
+      </div>
+    </div>
+
+    <div class="market-group">
+      <div class="section-label">Cryptocurrency</div>
+      <div class="market-item" data-symbol="BTCUSD" data-type="Crypto" data-name="Bitcoin / USD">
+        <div class="market-dot" style="background:#F7931A"></div>
+        <div class="market-info"><div class="market-symbol">BTC/USD</div><div class="market-name">Bitcoin Spot</div></div>
+        <div class="market-chg bull">Live</div>
+      </div>
+      <div class="market-item" data-symbol="SOLUSD" data-type="Crypto" data-name="Solana / USD">
+        <div class="market-dot" style="background:#00E5A0"></div>
+        <div class="market-info"><div class="market-symbol">SOL/USD</div><div class="market-name">Solana Spot</div></div>
+        <div class="market-chg bull">Live</div>
+      </div>
+    </div>
+
+    <div class="market-group">
+      <div class="section-label">Binary / Synthetics</div>
+      <div class="market-item" data-symbol="Volatility 75 Index" data-type="Synthetic" data-name="Volatility 75 Index (Deriv)">
+        <div class="market-dot" style="background:#00E5A0"></div>
+        <div class="market-info"><div class="market-symbol">Vol 75</div><div class="market-name">Deriv Synthetic</div></div>
+        <div class="market-chg neutral-c">Live</div>
+      </div>
+    </div>
+  </aside>
 
   <main class="main">
+
     <div class="input-zone">
-      <div class="input-label">Market Workspace Parameters</div>
+      <div class="input-label">Market Analysis Parameters</div>
       <div class="input-row">
         <div class="field-group">
+          <label>SYMBOL</label>
+          <input type="text" id="symbolInput" placeholder="e.g. EURUSD, XAUUSD" value="EURUSD">
+        </div>
+        <div class="field-group">
           <label>MARKET TYPE</label>
-          <select id="marketType" onchange="handleMarketTypeChange()">
+          <select id="marketType">
             <option value="Forex">Forex</option>
             <option value="Commodity">Commodity</option>
-            <option value="Crypto">Crypto</option>
+            <option value="Stock">Stock / Index</option>
             <option value="Binary / Synthetic">Binary / Synthetic</option>
+            <option value="Crypto">Crypto</option>
           </select>
         </div>
         <div class="field-group">
-          <label>SYMBOL SELECTOR</label>
-          <select id="symbolSelect" onchange="handleSymbolSelectChange()"></select>
-        </div>
-        <div class="field-group">
-          <label>FUZZY SYMBOL</label>
-          <input type="text" id="symbolInput" value="EURUSD" oninput="handleManualInput(this.value)">
-        </div>
-        <div class="field-group">
-          <label>INTERVAL TIMEFRAME</label>
-          <select id="timeframe" onchange="updateChartWidget()">
-            <option value="1">M1</option>
-            <option value="5">M5</option>
-            <option value="15" selected>M15</option>
-            <option value="60">H1</option>
-            <option value="240">H4</option>
+          <label>TIMEFRAME</label>
+          <select id="timeframe">
+            <option value="1-minute">M1 — 1 Minute</option>
+            <option value="5-minute">M5 — 5 Minutes</option>
+            <option value="15-minute" selected>M15 — 15 Minutes</option>
+            <option value="1-hour">H1 — 1 Hour</option>
+            <option value="4-hour">H4 — 4 Hours</option>
+            <option value="Daily">D1 — Daily</option>
           </select>
         </div>
         <div class="field-group">
-          <label>STRATEGY CONTEXT</label>
+          <label>TRADE STYLE</label>
           <select id="tradeStyle">
             <option value="scalping">Scalping</option>
             <option value="day trading" selected>Day Trading</option>
-            <option value="swing trading">Swing Trading</option>
+            <option value="swing trading">Swing</option>
           </select>
         </div>
-        <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">⚡ Analyze</button>
+        <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">
+          ⚡ Analyze
+        </button>
       </div>
     </div>
 
     <div class="metrics-bar" id="metricsBar" style="display:none">
       <div class="metric-card">
-        <div class="metric-label">Signal Outcome</div>
+        <div class="metric-label">Signal</div>
         <div class="metric-val" id="m-signal">—</div>
-        <div class="metric-sub" id="m-signal-sub">Engine state</div>
+        <div class="metric-sub" id="m-signal-sub">Awaiting analysis</div>
       </div>
       <div class="metric-card">
         <div class="metric-label">Confidence</div>
         <div class="metric-val" id="m-conf">—</div>
-        <div class="metric-sub" id="m-conf-sub">Mathematical score</div>
+        <div class="metric-sub">AI Confidence Score</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Structure Trend</div>
+        <div class="metric-label">Trend</div>
         <div class="metric-val" id="m-trend">—</div>
-        <div class="metric-sub" id="m-trend-sub">Order block profile</div>
+        <div class="metric-sub" id="m-trend-sub">Market structure</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Volatility context</div>
+        <div class="metric-label">Volatility</div>
         <div class="metric-val" id="m-vol">—</div>
-        <div class="metric-sub" id="m-vol-sub">ATR range velocity</div>
+        <div class="metric-sub">Current ATR context</div>
       </div>
       <div class="metric-card">
-        <div class="metric-label">Suggested R:R</div>
+        <div class="metric-label">Risk/Reward</div>
         <div class="metric-val" id="m-rr">—</div>
-        <div class="metric-sub" id="m-rr-sub">Target profile</div>
+        <div class="metric-sub">Suggested ratio</div>
       </div>
-    </div>
-
-    <div class="chart-zone">
-      <div class="chart-container" id="tvChartContainer"></div>
     </div>
 
     <div class="output-zone">
       <div class="placeholder" id="placeholder">
         <div class="placeholder-icon">📊</div>
-        <h3>Select asset parameters to engage analysis</h3>
+        <h3>Select a market to begin</h3>
+        <p>Choose a symbol from the sidebar or type one above, set your timeframe and trading style, then click Analyze to get a full AI-powered market breakdown.</p>
       </div>
 
       <div class="loading-wrap" id="loadingWrap" style="display:none">
         <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">HANDSHAKING SYSTEM REGISTERS...</div>
+        <div class="loading-text" id="loadingText">CONNECTING TO ANALYSIS ENGINE...</div>
       </div>
 
       <div id="analysisResult" style="display:none" class="analysis-wrap"></div>
     </div>
+
   </main>
 </div>
 
 <script>
-const assetDatabase = [
-  { symbol: "EURUSD", name: "Euro / US Dollar", aliases: ["euro", "eur", "eurusd"], type: "Forex", tvSymbol: "FX:EURUSD", color: "#0099FF", change: "Live" },
-  { symbol: "GBPUSD", name: "British Pound / US Dollar", aliases: ["pound", "gbp", "gbpusd"], type: "Forex", tvSymbol: "FX:GBPUSD", color: "#0099FF", change: "Live" },
-  { symbol: "XAUUSD", name: "Gold / US Dollar", aliases: ["gold", "xau", "xauusd"], type: "Commodity", tvSymbol: "OANDA:XAUUSD", color: "#FFB300", change: "Live" },
-  { symbol: "BTCUSD", name: "Bitcoin / USD", aliases: ["bitcoin", "btc", "btcusd"], type: "Crypto", tvSymbol: "BINANCE:BTCUSDT", color: "#F7931A", change: "Live" },
-  { symbol: "SOLUSD", name: "Solana / USD", aliases: ["solana", "sol", "solusd"], type: "Crypto", tvSymbol: "BINANCE:SOLUSDT", color: "#00E5A0", change: "Live" },
-  { symbol: "Volatility 75 Index", name: "Volatility 75 Index (Deriv)", aliases: ["v75", "vol 75", "volatility 75"], type: "Binary / Synthetic", tvSymbol: "DERIV:VOLATILITY75INDEX", color: "#00E5A0", change: "Live" },
-  { symbol: "Volatility 100 Index", name: "Volatility 100 Index (Deriv)", aliases: ["v100", "vol 100", "volatility 100"], type: "Binary / Synthetic", tvSymbol: "DERIV:VOLATILITY100INDEX", color: "#00E5A0", change: "Live" }
-];
-
-const DERIV_TICKER_MAP = {
-  "Volatility 75 Index": "R_75",
-  "Volatility 100 Index": "R_100"
-};
-
 let analysisHistory = [];
 
-window.addEventListener('DOMContentLoaded', () => {
-  renderSidebarMarkup();
-  handleMarketTypeChange();
+const loadingMessages = [
+  'SCANNING MARKET STRUCTURE...',
+  'ANALYZING PRICE ACTION...',
+  'COMPUTING SUPPORT & RESISTANCE...',
+  'EVALUATING TECHNICAL INDICATORS...',
+  'GENERATING TRADE SETUPS...',
+  'CALCULATING RISK PARAMETERS...',
+  'FINALIZING ANALYSIS...',
+];
+
+function safeParseJSON(text) {
+  try { return JSON.parse(text); } catch (_) {}
+  const start = text.indexOf('{');
+  if (start === -1) throw new Error('No JSON object found in response.');
+  let jsonStr = text.slice(start);
+  try { return JSON.parse(jsonStr); } catch (_) {}
+  jsonStr = jsonStr.replace(/,\s*$/, '');
+  let braces = 0, brackets = 0, inString = false, escape = false;
+  for (let i = 0; i < jsonStr.length; i++) {
+    const c = jsonStr[i];
+    if (escape) { escape = false; continue; }
+    if (c === '\\' && inString) { escape = true; continue; }
+    if (c === '"') { inString = !inString; continue; }
+    if (inString) continue;
+    if (c === '{') braces++;
+    else if (c === '}') braces--;
+    else if (c === '[') brackets++;
+    else if (c === ']') brackets--;
+  }
+  if (inString) jsonStr += '"';
+  jsonStr += ']'.repeat(Math.max(0, brackets));
+  jsonStr += '}'.repeat(Math.max(0, braces));
+  try { return JSON.parse(jsonStr); } catch (e) {
+    const fallback = {
+      signal: 'NEUTRAL', confidence: 50, trend: 'SIDEWAYS', volatility: 'MEDIUM',
+      riskReward: '1:1.5', entryZone: 'See analysis', stopLoss: 'See analysis',
+      takeProfit1: 'See analysis', takeProfit2: 'See analysis', takeProfit3: 'See analysis',
+      marketBias: 'Analysis partially retrieved.', priceAction: 'See description details.',
+      keyLevels: 'Review charts.', indicators: [], sessionContext: '', tradeScenario: '',
+      riskWarning: 'Verify settings manually.', binaryNote: ''
+    };
+    return fallback;
+  }
+}
+
+// Sidebar Selection Mechanics
+document.querySelectorAll('.market-item').forEach(item => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.market-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('symbolInput').value = item.dataset.symbol;
+    document.getElementById('marketType').value = item.dataset.type === 'Synthetic' ? 'Binary / Synthetic' : item.dataset.type;
+  });
 });
 
-function renderSidebarMarkup() {
-  const container = document.getElementById('sidebarList');
-  const groups = ["Forex", "Commodity", "Crypto", "Binary / Synthetic"];
-  let html = "";
-  groups.forEach(g => {
-    const items = assetDatabase.filter(item => item.type === g);
-    if(items.length === 0) return;
-    html += `<div class="market-group"><div class="section-label">${g}</div>`;
-    items.forEach(item => {
-      html += `
-        <div class="market-item" id="side-${item.symbol}" onclick="selectAsset('${item.symbol}')">
-          <div class="market-dot" style="background:${item.color}"></div>
-          <div class="market-info">
-            <div class="market-symbol">${item.symbol}</div>
-          </div>
-          <div class="market-chg">${item.change}</div>
-        </div>`;
-    });
-    html += `</div>`;
-  });
-  container.innerHTML = html;
-}
-
-function selectAsset(symbol) {
-  const item = assetDatabase.find(a => a.symbol === symbol);
-  if (!item) return;
-  document.querySelectorAll('.market-item').forEach(el => el.classList.remove('active'));
-  const sideEl = document.getElementById(`side-${item.symbol}`);
-  if (sideEl) sideEl.classList.add('active');
-
-  document.getElementById('marketType').value = item.type;
-  populateSymbolsDropdown(item.type);
-  document.getElementById('symbolSelect').value = item.symbol;
-  document.getElementById('symbolInput').value = item.symbol;
-  updateChartWidget();
-}
-
-function handleMarketTypeChange() {
-  const mType = document.getElementById('marketType').value;
-  populateSymbolsDropdown(mType);
-  const available = assetDatabase.find(a => a.type === mType);
-  if (available) selectAsset(available.symbol);
-}
-
-function populateSymbolsDropdown(marketType) {
-  const dropdown = document.getElementById('symbolSelect');
-  const filtered = assetDatabase.filter(a => a.type === marketType);
-  dropdown.innerHTML = filtered.map(a => `<option value="${a.symbol}">${a.symbol}</option>`).join('');
-}
-
-function handleSymbolSelectChange() {
-  selectAsset(document.getElementById('symbolSelect').value);
-}
-
-function handleManualInput(val) {
-  const clean = val.toLowerCase().trim();
-  const match = assetDatabase.find(item => item.symbol.toLowerCase() === clean || item.aliases.some(a => clean.includes(a)));
-  if (match) {
-    document.getElementById('marketType').value = match.type;
-    populateSymbolsDropdown(match.type);
-    document.getElementById('symbolSelect').value = match.symbol;
-    updateChartWidget();
-  }
-}
-
-function updateChartWidget() {
-  const inputSym = document.getElementById('symbolInput').value.trim();
-  let asset = assetDatabase.find(a => a.symbol === inputSym);
-  let tvTicker = asset ? asset.tvSymbol : "FX:EURUSD";
-  const tfSelect = document.getElementById('timeframe').value;
-
-  document.getElementById('tvChartContainer').innerHTML = `<div id="tv_widget_embed"></div>`;
+// Robust Spot Price Engine
+async function fetchCurrentMarketPrice(symbol, marketType) {
+  let cleanSymbol = symbol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   
-  const widgetConfig = {
-    "width": "100%", "height": 420, "symbol": tvTicker, "interval": tfSelect,
-    "timezone": "Etc/UTC", "theme": "dark", "style": "1", "locale": "en",
-    "container_id": "tv_widget_embed", "studies": ["RSI@tv-basicstudies"]
-  };
-  if(tvTicker.startsWith("DERIV:")) widgetConfig.exchange = "DERIV";
-  new TradingView.widget(widgetConfig);
-}
-
-// Deriv Data Fetcher
-async function fetchDerivCandles(symbol, timeframe) {
-  const derivSymbol = DERIV_TICKER_MAP[symbol] || "R_75";
-  let granularity = 900; 
-  if (timeframe === "1") granularity = 60;
-  if (timeframe === "5") granularity = 300;
-  if (timeframe === "60") granularity = 3600;
-
-  return new Promise((resolve) => {
-    const ws = new WebSocket('wss://ws.derivws.com/websockets/v3?app_id=1089');
-    ws.onopen = () => {
-      ws.send(JSON.stringify({
-        ticks_history: derivSymbol, adjust_start_time: 1, count: 5, end: "latest", granularity: granularity, style: "candles"
-      }));
-    };
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.candles) {
-        const out = data.candles.map(c => `O:${c.open} H:${c.high} L:${c.low} C:${c.close}`);
-        ws.close(); resolve(out);
-      } else { ws.close(); resolve(null); }
-    };
-    ws.onerror = () => { ws.close(); resolve(null); };
-    setTimeout(() => { ws.close(); resolve(null); }, 3500);
-  });
-}
-
-// Global Spot Price Fetcher for Forex/Commodities/Crypto
-async function fetchGlobalSpotPrice(symbol) {
-  let querySymbol = symbol.toUpperCase();
-  if (querySymbol === "XAUUSD") querySymbol = "PAXGUSDT"; // Use gold-backed crypto asset proxy for free live rate mapping
-  if (querySymbol === "BTCUSD") querySymbol = "BTCUSDT";
-  if (querySymbol === "SOLUSD") querySymbol = "SOLUSDT";
-
-  // Handle standard Forex fallback if crypto endpoint can't map directly
-  if (querySymbol === "EURUSD" || querySymbol === "GBPUSD") {
+  if (marketType === 'Forex' || cleanSymbol === 'EURUSD' || cleanSymbol === 'GBPUSD') {
     try {
-      const res = await fetch(`https://api.frontendapi.com/v1/pairs/${querySymbol.toLowerCase()}`).then(r => r.json());
-      return res.price || null;
-    } catch {
-      return null;
-    }
+      const res = await fetch(`https://open.er-api.com/v6/latest/USD`).then(r => r.json());
+      if (cleanSymbol === 'EURUSD' && res.rates?.EUR) return (1 / res.rates.EUR).toFixed(4);
+      if (cleanSymbol === 'GBPUSD' && res.rates?.GBP) return (1 / res.rates.GBP).toFixed(4);
+    } catch (e) {}
   }
+
+  if (cleanSymbol === 'XAUUSD' || cleanSymbol === 'GOLD') cleanSymbol = 'PAXGUSDT';
+  if (cleanSymbol === 'BTCUSD') cleanSymbol = 'BTCUSDT';
+  if (cleanSymbol === 'SOLUSD') cleanSymbol = 'SOLUSDT';
 
   try {
-    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${querySymbol}`).then(r => r.json());
-    if (res.price) {
-      let finalPrice = parseFloat(res.price);
-      // If we used gold-backed proxy, adjust formatting to reflect true commodity spot value scaling
-      if (symbol.toUpperCase() === "XAUUSD" && finalPrice < 3000) {
-        return "4060.45"; // Static or proxy balance adjustment fallback if api limits trigger
-      }
-      return finalPrice.toString();
-    }
-    return null;
-  } catch {
-    return null;
-  }
+    const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${cleanSymbol}`).then(r => r.json());
+    if (res.price) return parseFloat(res.price).toFixed(2);
+  } catch (e) {}
+
+  return null;
 }
 
 async function runAnalysis() {
-  const symbol = document.getElementById('symbolInput').value.trim().toUpperCase();
+  const symbol = document.getElementById('symbolInput').value.trim();
+  const marketType = document.getElementById('marketType').value;
   const timeframe = document.getElementById('timeframe').value;
   const tradeStyle = document.getElementById('tradeStyle').value;
-  const marketType = document.getElementById('marketType').value;
 
-  // 1. Reset Dashboard Display Containers Safely
+  if (!symbol) { alert('Please enter a symbol.'); return; }
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+
   document.getElementById('placeholder').style.display = 'none';
   document.getElementById('analysisResult').style.display = 'none';
   document.getElementById('metricsBar').style.display = 'none';
   document.getElementById('loadingWrap').style.display = 'flex';
-  document.getElementById('loadingText').textContent = `INITIALIZING ENGINE GRID FOR ${symbol}...`;
 
-  let marketContextString = "";
+  let msgIdx = 0;
+  const msgInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % loadingMessages.length;
+    document.getElementById('loadingText').textContent = loadingMessages[msgIdx];
+  }, 900);
 
-  // 2. Data Router Loop
-  if (marketType === "Binary / Synthetic") {
-    document.getElementById('loadingText').textContent = "STREAMING DERIV REAL-TIME LEDGER DATA...";
-    const candles = await fetchDerivCandles(symbol, timeframe);
-    if(candles && candles.length > 0) {
-      marketContextString = `Live Synthetic Candle Arrays for ${symbol} (M${timeframe}):\n${candles.join('\n')}`;
-    } else {
-      marketContextString = `Synthetic Index Tracking Frame for ${symbol}. Interval: M${timeframe}.`;
-    }
+  // Capture Live Spot Baseline
+  document.getElementById('loadingText').textContent = `CAPTURING LIVE PRICE FEED FOR ${symbol}...`;
+  const livePrice = await fetchCurrentMarketPrice(symbol, marketType);
+  
+  let priceContextString = "";
+  if (livePrice) {
+    priceContextString = `CRITICAL LIVE DATA: The asset is currently trading precisely at: ${livePrice}.\nAll targets, support/resistance zones, stop loss points, and entries MUST be calculated relative to this active market price baseline. Do not use historical baselines.`;
   } else {
-    // Forex, Commodities, and Crypto Standard Multipliers
-    document.getElementById('loadingText').textContent = `MAPPING STRUCTURE VECTOR FOR ${symbol}...`;
-    
-    // Instead of hardcoding numbers, we instruct the model dynamically based on your precise selection
-    marketContextString = `Asset Target Ticker: ${symbol}
-Market Classification Profile: ${marketType}
-Timeframe Anchor Layout: M${timeframe}
-Active Execution Strategy Context: ${tradeStyle}
-
-INSTRUCTIONS: Evaluate the technical structure for ${symbol} on the M${timeframe} chart grid. 
-Identify major local support and resistance boundaries, structure breaks, order blocks, and high liquidity zones. 
-All generated numerical metrics (Entry Zone, Stop Loss, Take Profits) MUST align completely with the real-time global spot price tracking for ${symbol}. Do not reference any alternative assets or unrelated asset values.`;
+    priceContextString = `Note: Real-time price feed is unavailable. Structure your metrics around normal scale parameters for ${symbol}.`;
   }
 
-  // 3. System Prompt Constraints Template Configuration
-  const systemInstruction = `You are TradeScope, a precision AI technical analysis assistant. You communicate using clear, high-conviction, professional trading floor logic. 
-You must evaluate the market parameters provided and return exactly ONE valid, raw JSON block matching this structural blueprint:
+  const systemPrompt = `You are TradeScope, a professional trading analysis engine used by forex, stock, commodity, and binary options traders. 
+You MUST respond ONLY with a single valid JSON object and nothing else — no markdown, no backticks, no explanation.
+
+Your JSON must have exactly these fields:
 {
   "signal": "BUY" | "SELL" | "NEUTRAL",
-  "confidence": 85,
+  "confidence": <number 0-100>,
   "trend": "BULLISH" | "BEARISH" | "SIDEWAYS",
   "volatility": "LOW" | "MEDIUM" | "HIGH",
-  "riskReward": "1:2 or dynamic ratio",
-  "entryZone": "Immediate logical coordinates matching the active symbol price scale",
-  "stopLoss": "Invalidation point coordinates matching the active symbol price scale",
-  "takeProfit1": "Target level 1 matching the active symbol price scale",
-  "takeProfit2": "Target level 2 matching the active symbol price scale",
-  "takeProfit3": "Target level 3 matching the active symbol price scale",
-  "marketBias": "A short, sharp statement detailing current directional pressure.",
-  "priceAction": "2 clear sentences detailing candle behavior, market inefficiencies, or structural balance shifts.",
-  "keyLevels": "Identify concrete horizontal support and resistance layers.",
+  "riskReward": "<e.g. 1:2.5>",
+  "entryZone": "<price range or description>",
+  "stopLoss": "<price or % or pips>",
+  "takeProfit1": "<first target>",
+  "takeProfit2": "<second target>",
+  "takeProfit3": "<third target>",
+  "marketBias": "<1-2 sentences on overall directional bias>",
+  "priceAction": "<2-3 sentences on current price action patterns, candlestick patterns, structure>",
+  "keyLevels": "<2-3 sentences on support, resistance, zones to watch>",
   "indicators": [
-    { "name": "Relative Strength Index (14)", "value": "Estimated structural value", "signal": "BULLISH" | "BEARISH" | "NEUTRAL" }
+    { "name": "RSI (14)", "value": "<value or reading>", "signal": "BUY"|"SELL"|"NEUTRAL" },
+    { "name": "MACD", "value": "<reading>", "signal": "BUY"|"SELL"|"NEUTRAL" },
+    { "name": "EMA 20/50", "value": "<reading>", "signal": "BUY"|"SELL"|"NEUTRAL" }
   ],
-  "sessionContext": "Active volatility windows context layout.",
-  "tradeScenario": "Step by step playbook rules for trigger execution.",
-  "riskWarning": "Candid warnings about tracking errors or risk mitigation steps.",
-  "binaryNote": ""
+  "sessionContext": "<1-2 sentences on which market session is relevant>",
+  "tradeScenario": "<3-4 sentences describing the full trade setup step by step>",
+  "riskWarning": "<1-2 sentences on key risk to this trade>",
+  "binaryNote": "<Note if binary/synthetic, otherwise leave empty string.>"
 }`;
 
-  // 4. Send API payload via serverless connection route
+  const userPrompt = `Analyze ${symbol} (${marketType}) on the ${timeframe} timeframe for a ${tradeStyle} trader.
+${priceContextString}
+
+Provide a complete professional analysis with specific actionable levels, indicator readings, and a clear trade setup. 
+Be realistic, specific, and construct plausible numerical matrices using exact decimals that reflect the provided current market price scale.`;
+
   try {
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ promptText: marketContextString, systemInstruction })
+      body: JSON.stringify({ promptText: userPrompt, systemInstruction: systemPrompt })
     });
 
-    if(!response.ok) throw new Error(`Serverless request error. Pipeline code: ${response.status}`);
     const data = await response.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
-    
+    const raw = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const result = safeParseJSON(clean);
+
+    clearInterval(msgInterval);
     document.getElementById('loadingWrap').style.display = 'none';
-    const result = JSON.parse(rawText.trim());
-    
-    // Pass the symbol along to avoid UI overlay confusion
-    renderAnalysis(result, symbol, timeframe);
+
+    renderAnalysis(result, symbol, marketType, timeframe, tradeStyle);
     updateMetrics(result);
-    
-    analysisHistory.unshift({ symbol, direction: result.signal, time: new Date().toLocaleTimeString() });
+
+    analysisHistory.unshift({ symbol, direction: result.signal, time: new Date().toLocaleTimeString(), result });
+    if (analysisHistory.length > 10) analysisHistory.pop();
+
   } catch (err) {
+    clearInterval(msgInterval);
     document.getElementById('loadingWrap').style.display = 'none';
     document.getElementById('placeholder').style.display = 'flex';
     document.getElementById('placeholder').innerHTML = `
       <div class="placeholder-icon">⚠️</div>
-      <h3>Handshake Vector Failure</h3>
-      <p>${err.message || 'Check your Vercel logs and API environment settings.'}</p>
+      <h3>Analysis Error</h3>
+      <p>${err.message || 'Failed to complete transaction pipeline.'}</p>
     `;
   }
+
+  btn.disabled = false;
 }
+
 function updateMetrics(r) {
-  document.getElementById('metricsBar').style.display = 'grid';
-  document.getElementById('m-signal').textContent = r.signal;
-  document.getElementById('m-conf').textContent = r.confidence + '%';
-  document.getElementById('m-trend').textContent = r.trend;
+  const bar = document.getElementById('metricsBar');
+  bar.style.display = 'grid';
+
+  const sigEl = document.getElementById('m-signal');
+  sigEl.textContent = r.signal;
+  sigEl.className = 'metric-val ' + (r.signal === 'BUY' ? 'bull' : r.signal === 'SELL' ? 'bear' : 'neutral-c');
+
+  const confEl = document.getElementById('m-conf');
+  confEl.textContent = r.confidence + '%';
+
+  const trendEl = document.getElementById('m-trend');
+  trendEl.textContent = r.trend;
+
   document.getElementById('m-vol').textContent = r.volatility;
   document.getElementById('m-rr').textContent = r.riskReward;
 }
 
-function renderAnalysis(r, symbol, tf) {
-  const sc = r.signal === 'BUY' ? 'bull' : r.signal === 'SELL' ? 'bear' : 'neutral-c';
-  const sBg = r.signal === 'BUY' ? 'bull-bg' : r.signal === 'SELL' ? 'bear-bg' : 'neutral-bg';
-  
-  const historyRows = analysisHistory.map(h => `<div class="history-item"><span>${h.symbol}</span><span class="bull">${h.direction}</span></div>`).join('');
+function renderAnalysis(r, symbol, marketType, timeframe, tradeStyle) {
+  const signalClass = r.signal === 'BUY' ? 'bull' : r.signal === 'SELL' ? 'bear' : 'neutral-c';
+  const signalIcon = r.signal === 'BUY' ? '📈' : r.signal === 'SELL' ? '📉' : '⚖️';
+  const signalBg = r.signal === 'BUY' ? 'bull-bg' : r.signal === 'SELL' ? 'bear-bg' : 'neutral-bg';
+  const confColor = r.confidence >= 70 ? 'var(--bull)' : r.confidence >= 50 ? 'var(--neutral)' : 'var(--bear)';
+
+  const indRows = (r.indicators || []).map(ind => {
+    const sc = ind.signal === 'BUY' ? 'sig-bull' : ind.signal === 'SELL' ? 'sig-bear' : 'sig-neu';
+    return `<div class="indicator-row">
+      <span class="ind-name">${ind.name}</span>
+      <span class="ind-val">${ind.value}</span>
+      <span class="ind-signal ${sc}">${ind.signal}</span>
+    </div>`;
+  }).join('');
+
+  const historyRows = analysisHistory.slice(1).map(h => {
+    const hClass = h.direction === 'BUY' ? 'bull' : h.direction === 'SELL' ? 'bear' : 'neutral-c';
+    return `<div class="history-item">
+      <span class="h-sym">${h.symbol}</span>
+      <span class="h-dir ${hClass}">${h.direction}</span>
+      <span class="h-time">${h.time}</span>
+    </div>`;
+  }).join('') || '<div style="color:var(--dim);font-size:12px;padding:8px 0">No previous records</div>';
+
+  const binarySection = r.binaryNote ? `
+    <div class="card">
+      <div class="card-header"><div class="card-title">🎯 Binary / Synthetic Note</div></div>
+      <div class="card-body"><div class="prose-block">${r.binaryNote}</div></div>
+    </div>` : '';
 
   document.getElementById('analysisResult').innerHTML = `
     <div class="analysis-left">
       <div class="card">
+        <div class="card-header">
+          <div class="card-title">⚡ AI Signal — ${symbol} · ${timeframe.toUpperCase()}</div>
+        </div>
         <div class="signal-big">
-          <div class="signal-icon ${sBg}">📊</div>
-          <div>
-            <div class="signal-direction ${sc}">${r.signal}</div>
-            <div class="prose-block" style="color:var(--muted); margin-top:4px">${r.marketBias}</div>
-            <div class="confidence-bar"><div class="confidence-fill" style="width:${r.confidence}%; background:var(--accent)"></div></div>
+          <div class="signal-icon ${signalBg}">${signalIcon}</div>
+          <div class="signal-text">
+            <div class="signal-direction ${signalClass}">${r.signal}</div>
+            <div class="signal-sub">${r.marketBias}</div>
+            <div class="confidence-bar"><div class="confidence-fill" style="width:${r.confidence}%;background:${confColor}"></div></div>
           </div>
         </div>
       </div>
+
       <div class="card">
-        <div class="card-header"><div class="card-title">🎯 Technical Target Matrices</div></div>
+        <div class="card-header"><div class="card-title">🎯 Trade Levels</div></div>
         <div class="card-body">
           <div class="levels-grid">
             <div class="level-box"><div class="level-tag">Entry Zone</div><div class="level-price">${r.entryZone}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bear)">Stop Loss</div><div class="level-price">${r.stopLoss}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bull)">Take Profit 1</div><div class="level-price">${r.takeProfit1}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bear)">Stop Loss</div><div class="level-price" style="color:var(--bear)">${r.stopLoss}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 1</div><div class="level-price" style="color:var(--bull)">${r.takeProfit1}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 2</div><div class="level-price" style="color:var(--bull)">${r.takeProfit2}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 3</div><div class="level-price" style="color:var(--bull)">${r.takeProfit3}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--accent2)">R:R Ratio</div><div class="level-price" style="color:var(--accent2)">${r.riskReward}</div></div>
           </div>
         </div>
       </div>
+
       <div class="card">
-        <div class="card-header"><div class="card-title">📖 Narrative Context Matrix</div></div>
+        <div class="card-header"><div class="card-title">📋 Market Analysis</div></div>
         <div class="card-body prose-section">
-          <div class="prose-block"><strong>Price Action:</strong> ${r.priceAction}</div>
-          <div class="prose-block"><strong>Key Levels:</strong> ${r.keyLevels}</div>
-          <div class="prose-block"><strong>Scenario Route:</strong> ${r.tradeScenario}</div>
+          <div><div class="prose-block"><strong>Price Action:</strong> ${r.priceAction}</div></div>
+          <div><div class="prose-block"><strong>Key Levels:</strong> ${r.keyLevels}</div></div>
+          <div><div class="prose-block"><strong>Trade Scenario:</strong> ${r.tradeScenario}</div></div>
+          <div><div class="prose-block"><strong>Session Context:</strong> ${r.sessionContext}</div></div>
         </div>
       </div>
+
+      ${binarySection}
     </div>
+
     <div class="analysis-right">
       <div class="card">
-        <div class="card-header"><div class="card-title">🛡️ Risk Boundary Configurations</div></div>
+        <div class="card-header"><div class="card-title">📡 Technical Indicators</div></div>
+        <div class="card-body"><div class="indicator-list">${indRows}</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🛡️ Risk Parameters</div></div>
         <div class="card-body">
           <div class="risk-grid">
-            <div class="risk-item"><div class="level-tag">Volatility</div><div>${r.volatility}</div></div>
-            <div class="risk-item"><div class="level-tag">Trend Bias</div><div>${r.trend}</div></div>
+            <div class="risk-item"><div class="risk-label">Trend Bias</div><div class="risk-val">${r.trend}</div></div>
+            <div class="risk-item"><div class="risk-label">Volatility</div><div class="risk-val">${r.volatility}</div></div>
           </div>
         </div>
       </div>
       <div class="card">
-        <div class="card-header"><div class="card-title">🕒 Loop History</div></div>
-        <div class="card-body">${historyRows || 'No older iterations stored.'}</div>
+        <div class="card-header"><div class="card-title">🕒 Session History</div></div>
+        <div class="card-body">${historyRows}</div>
       </div>
     </div>
   `;
