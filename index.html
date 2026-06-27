@@ -238,12 +238,12 @@
     </div>
     <div class="market-group">
       <div class="section-label">Deriv Synthetics</div>
-      <div class="market-item" data-sym="Volatility 75 Index" data-tv="DERIVCOM:VOLATILITY75" data-type="Binary / Synthetic">
+      <div class="market-item" data-sym="VOLATILITY 75 INDEX" data-tv="DERIVCOM:VOLATILITY75" data-type="Binary / Synthetic">
         <div class="market-dot" style="background:#00E5A0"></div>
         <div class="market-info"><div class="market-symbol">Vol 75</div><div class="market-name">Volatility 75</div></div>
         <div class="market-price-badge">SYNTH</div>
       </div>
-      <div class="market-item" data-sym="Volatility 100 Index" data-tv="DERIVCOM:VOLATILITY100" data-type="Binary / Synthetic">
+      <div class="market-item" data-sym="VOLATILITY 100 INDEX" data-tv="DERIVCOM:VOLATILITY100" data-type="Binary / Synthetic">
         <div class="market-dot" style="background:#00E5A0"></div>
         <div class="market-info"><div class="market-symbol">Vol 100</div><div class="market-name">Volatility 100</div></div>
         <div class="market-price-badge">SYNTH</div>
@@ -350,7 +350,6 @@ document.querySelectorAll('.market-item').forEach(el => {
     document.getElementById('symbolInput').value = currentSym;
     document.getElementById('marketType').value  = currentType;
     updateTickerDisplay(currentSym);
-    // If chart already rendered, swap it
     if (document.getElementById('tv-frame-wrap')) buildChart(currentTV, document.getElementById('timeframe').value);
   });
 });
@@ -361,9 +360,8 @@ function reloadChart() {
 
 // ── LIVE PRICE ─────────────────────────────────────────────────────────────
 async function fetchLivePrice(sym, type) {
-  const s = sym.replace(/[^A-Za-z0-9]/g,'').toUpperCase();
+  const s = sym.replace(/[^A-Za-z0-9 ]/g,'').toUpperCase().trim();
 
-  // Forex via open.er-api
   if (type === 'Forex') {
     try {
       const d = await fetch('https://open.er-api.com/v6/latest/USD').then(r=>r.json());
@@ -377,23 +375,20 @@ async function fetchLivePrice(sym, type) {
     } catch(e){}
   }
 
-  // Gold proxy via Binance PAXG
-  if (s==='XAUUSD') {
+  if (s==='XAUUSD' || s==='GOLD') {
     try {
       const d = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT').then(r=>r.json());
       if (d.price) return parseFloat(d.price).toFixed(2);
     } catch(e){}
   }
 
-  // Silver via open.er-api XAG base
-  if (s==='XAGUSD') {
+  if (s==='XAGUSD' || s==='SILVER') {
     try {
       const d = await fetch('https://open.er-api.com/v6/latest/XAG').then(r=>r.json());
       if (d.rates?.USD) return (d.rates.USD).toFixed(3);
     } catch(e){}
   }
 
-  // Crypto via Binance 24hr ticker
   const binMap = {BTCUSD:'BTCUSDT',ETHUSD:'ETHUSDT',SOLUSD:'SOLUSDT',BNBUSD:'BNBUSDT'};
   const bSym = binMap[s] || (s.endsWith('USD') ? s.slice(0,-3)+'USDT' : null);
   if (bSym) {
@@ -415,7 +410,6 @@ function updateTickerDisplay(sym) {
   }
 }
 
-// prefetch sidebar prices silently
 (async () => {
   window._priceCache = {};
   const list = [
@@ -439,11 +433,9 @@ function updateTickerDisplay(sym) {
 
 // ── CHART ──────────────────────────────────────────────────────────────────
 function buildChart(tvSym, interval) {
-  // Uses TradingView.widget() from tv.js — the exact same method as reference code
   const container = document.getElementById('tv-frame-wrap');
   if (!container) return;
 
-  // Clear old widget
   container.innerHTML = '<div id="tv_chart_inner"></div>';
 
   new TradingView.widget({
@@ -491,7 +483,6 @@ function safeJSON(text) {
   if (s<0) return null;
   let j = clean.slice(s);
   try { return JSON.parse(j); } catch(_){}
-  // balance
   let b=0,br=0,str=false,esc=false;
   for(const c of j){
     if(esc){esc=false;continue}
@@ -507,20 +498,43 @@ function safeJSON(text) {
 }
 
 async function runAnalysis() {
-  const symbol    = document.getElementById('symbolInput').value.trim();
+  const symbol    = document.getElementById('symbolInput').value.trim().toUpperCase();
   const marketType = document.getElementById('marketType').value;
   const interval  = document.getElementById('timeframe').value;
   const tradeStyle = document.getElementById('tradeStyle').value;
   if (!symbol) { alert('Enter a symbol first.'); return; }
 
-  // Sync state
   currentSym  = symbol;
   currentType = marketType;
+
+  // Fallback map layout for custom manual searches
+  const tvMapping = {
+    'EURUSD': 'FX:EURUSD', 'GBPUSD': 'FX:GBPUSD', 'USDJPY': 'FX:USDJPY', 'AUDUSD': 'FX:AUDUSD',
+    'XAUUSD': 'TVC:GOLD', 'GOLD': 'TVC:GOLD', 'XAGUSD': 'TVC:SILVER', 'SILVER': 'TVC:SILVER',
+    'BTCUSD': 'BINANCE:BTCUSDT', 'ETHUSD': 'BINANCE:ETHUSDT', 'SOLUSD': 'BINANCE:SOLUSDT',
+    'VOLATILITY 75': 'DERIVCOM:VOLATILITY75', 'VOLATILITY 75 INDEX': 'DERIVCOM:VOLATILITY75',
+    'VOLATILITY 100': 'DERIVCOM:VOLATILITY100', 'VOLATILITY 100 INDEX': 'DERIVCOM:VOLATILITY100'
+  };
+
   const sidebarEl = document.querySelector(`.market-item[data-sym="${symbol}"]`);
   if (sidebarEl) {
     document.querySelectorAll('.market-item').forEach(i=>i.classList.remove('active'));
     sidebarEl.classList.add('active');
-    currentTV = sidebarEl.dataset.tv || 'FX:EURUSD';
+    currentTV = sidebarEl.dataset.tv;
+  } else {
+    // Dynamic matching router for manual inputs & Deriv synthetics
+    if (tvMapping[symbol]) {
+      currentTV = tvMapping[symbol];
+    } else if (marketType === 'Binary / Synthetic' || symbol.includes('VOLATILITY') || symbol.includes('VOL')) {
+      let cleanNum = symbol.replace(/[^0-9]/g, '');
+      currentTV = cleanNum ? `DERIVCOM:VOLATILITY${cleanNum}` : 'DERIVCOM:VOLATILITY75';
+    } else if (marketType === 'Crypto') {
+      currentTV = `BINANCE:${symbol}USDT`;
+    } else if (marketType === 'Commodity') {
+      currentTV = `TVC:${symbol}`;
+    } else {
+      currentTV = `FX:${symbol}`;
+    }
   }
 
   const btn = document.getElementById('analyzeBtn');
@@ -541,7 +555,6 @@ async function runAnalysis() {
     if (el) el.textContent = MSGS[mi];
   }, 800);
 
-  // 1. Fetch live price
   const rawPrice = await fetchLivePrice(symbol, marketType);
   livePrice = rawPrice ? (typeof rawPrice==='object' ? rawPrice.price : rawPrice) : null;
   const change  = rawPrice && typeof rawPrice==='object' ? rawPrice.change : null;
@@ -556,7 +569,6 @@ async function runAnalysis() {
     if (sb) sb.textContent = livePrice;
   }
 
-  // 2. Call /api/analyze (our Edge Function — no CORS issues)
   let result;
   try {
     const res = await fetch('/api/analyze', {
@@ -632,13 +644,11 @@ function renderUI(r, symbol, type, interval, price, change) {
   }).join('') || '<div style="color:var(--dim);font-size:11px;padding:4px 0">No previous analyses</div>';
 
   const binaryHtml = r.binaryNote
-    ? `<div class="card"><div class="card-header"><div class="card-title">🎯 Binary / Synthetic Note</div></div><div class="card-body"><div class="prose-block">${r.binaryNote}</div></div></div>`
+    ? `<div class="card"><div class="card-header"><div class="card-title">🎯 Synthetic Data Breakdown</div></div><div class="card-body"><div class="prose-block">${r.binaryNote}</div></div></div>`
     : '';
 
   document.getElementById('contentArea').innerHTML = `
     <div class="left-col">
-
-      <!-- LIVE CHART -->
       <div class="chart-wrap">
         <div class="chart-header">
           <div class="chart-title">
@@ -646,16 +656,14 @@ function renderUI(r, symbol, type, interval, price, change) {
             ${price ? `<span class="price-pill">LIVE ${price}</span>` : ''}
             ${chgHtml}
           </div>
-          <span style="font-size:10px;color:var(--dim)">TradingView</span>
+          <span style="font-size:10px;color:var(--dim)">TradingView Widget</span>
         </div>
         <div id="tv-frame-wrap" style="height:380px;width:100%"></div>
       </div>
 
-      <!-- SIGNAL -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">⚡ AI Signal — ${symbol}</div>
-          ${price ? `<span class="price-pill">Based on ${price}</span>` : ''}
         </div>
         <div class="signal-big">
           <div class="signal-icon ${sbg}">${icon}</div>
@@ -667,11 +675,9 @@ function renderUI(r, symbol, type, interval, price, change) {
         </div>
       </div>
 
-      <!-- TRADE LEVELS -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">🎯 Trade Levels</div>
-          <span style="font-size:9px;color:var(--dim);font-family:'Space Mono',monospace">ANCHORED TO LIVE PRICE ${price||'—'}</span>
+          <div class="card-title">🎯 Trade Targets</div>
         </div>
         <div class="card-body">
           <div class="levels-grid">
@@ -685,7 +691,6 @@ function renderUI(r, symbol, type, interval, price, change) {
         </div>
       </div>
 
-      <!-- PROSE -->
       <div class="card">
         <div class="card-header"><div class="card-title">📋 Market Analysis</div></div>
         <div class="card-body prose-section">
@@ -700,10 +705,8 @@ function renderUI(r, symbol, type, interval, price, change) {
     </div>
 
     <div class="right-col">
-
-      <!-- CHART LEVELS PANEL -->
       <div class="card">
-        <div class="card-header"><div class="card-title">📌 Chart Levels</div></div>
+        <div class="card-header"><div class="card-title">📌 Chart Overlay Levels</div></div>
         <div class="card-body">
           <div class="levels-panel">
             ${r.resistanceLevel?`<div class="lp-row" style="background:rgba(255,77,106,.07);border:1px solid rgba(255,77,106,.18)"><span class="lp-label" style="color:var(--bear)">▼ Resistance</span><span class="lp-val" style="color:var(--bear)">${r.resistanceLevel}</span></div>`:''}
@@ -715,19 +718,17 @@ function renderUI(r, symbol, type, interval, price, change) {
             ${r.stopLoss?`<div class="lp-row" style="background:rgba(255,77,106,.08);border:1px solid rgba(255,77,106,.2)"><span class="lp-label" style="color:var(--bear)">✕ Stop</span><span class="lp-val" style="color:var(--bear)">${r.stopLoss}</span></div>`:''}
             ${r.supportLevel?`<div class="lp-row" style="background:rgba(0,201,122,.06);border:1px solid rgba(0,201,122,.15)"><span class="lp-label" style="color:var(--bull)">▲ Support</span><span class="lp-val" style="color:var(--bull)">${r.supportLevel}</span></div>`:''}
           </div>
-          <p style="margin-top:9px;font-size:9px;color:var(--dim);line-height:1.5">Right-click the chart → Add horizontal line to mark these levels on TradingView.</p>
+          <p style="margin-top:9px;font-size:9px;color:var(--dim);line-height:1.5">Right-click the TradingView chart to manually overlay these asset zones.</p>
         </div>
       </div>
 
-      <!-- INDICATORS -->
       <div class="card">
-        <div class="card-header"><div class="card-title">📡 Indicators</div></div>
+        <div class="card-header"><div class="card-title">📡 Technical Indicators</div></div>
         <div class="card-body"><div class="indicator-list">${indRows}</div></div>
       </div>
 
-      <!-- RISK -->
       <div class="card">
-        <div class="card-header"><div class="card-title">🛡️ Risk</div></div>
+        <div class="card-header"><div class="card-title">🛡️ Position Risk Management</div></div>
         <div class="card-body">
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
             <div style="background:var(--surface2);border-radius:7px;padding:9px 11px"><div style="font-size:9px;color:var(--muted);margin-bottom:4px">TREND</div><div style="font-family:'Space Mono',monospace;font-size:14px;font-weight:700" class="${r.trend==='BULLISH'?'bull':r.trend==='BEARISH'?'bear':'neutral-c'}">${r.trend}</div></div>
@@ -737,16 +738,13 @@ function renderUI(r, symbol, type, interval, price, change) {
         </div>
       </div>
 
-      <!-- HISTORY -->
       <div class="card">
-        <div class="card-header"><div class="card-title">🕒 History</div></div>
+        <div class="card-header"><div class="card-title">🕒 Evaluation History</div></div>
         <div class="card-body">${histRows}</div>
       </div>
-
     </div>
   `;
 
-  // Load TradingView chart after DOM update
   setTimeout(() => buildChart(currentTV, interval), 50);
 }
 </script>
