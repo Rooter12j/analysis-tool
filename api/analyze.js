@@ -69,8 +69,8 @@ Return this exact JSON structure (all fields required):
   "resistanceLevel": "<one key resistance price near current price>"
 }`;
 
-    // Gemini 2.0 Flash — free tier, fast
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    // Fixed: Route query to gemini-1.5-flash
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
     const response = await fetch(geminiUrl, {
       method: 'POST',
@@ -80,7 +80,7 @@ Return this exact JSON structure (all fields required):
         generationConfig: {
           temperature: 0.4,
           maxOutputTokens: 1500,
-          responseMimeType: 'application/json',   // forces Gemini to return pure JSON
+          responseMimeType: 'application/json',
         },
       }),
     });
@@ -94,7 +94,6 @@ Return this exact JSON structure (all fields required):
       });
     }
 
-    // Extract text from Gemini response
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
 
     return new Response(JSON.stringify({ text }), {
