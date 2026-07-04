@@ -55,6 +55,8 @@
   .btn-analyze:hover{opacity:0.88;}
   .btn-analyze:active{transform:scale(0.98);}
   .btn-analyze:disabled{opacity:0.4;cursor:not-allowed;}
+  .btn-analyze-cooldown{position:relative;}
+  .cooldown-label{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:10px;color:#0A0C10;font-weight:700;white-space:nowrap;}
 
   .metrics-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:16px 28px;}
   .metric-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;}
@@ -300,6 +302,8 @@
 let activeTvTicker = 'FX:EURUSD';
 let analysisHistory = [];
 let chartRenderTimeout;
+let lastAnalysisTime = 0;
+const ANALYSIS_COOLDOWN = 2000; // 2 seconds between requests
 
 const LOADING_MSGS = [
   'FETCHING LIVE PRICE DATA...',
@@ -412,8 +416,17 @@ function safeParseJSON(text) {
   try { return JSON.parse(j); } catch(_){ return null; }
 }
 
-// ── ANALYSIS ──────────────────────────────────────────────────────────
+// ── ANALYSIS with Rate Limiting ──────────────────────────────────────────
 async function runAnalysis() {
+  const now = Date.now();
+  const timeSinceLastRequest = now - lastAnalysisTime;
+  
+  if (timeSinceLastRequest < ANALYSIS_COOLDOWN) {
+    const waitTime = Math.ceil((ANALYSIS_COOLDOWN - timeSinceLastRequest) / 1000);
+    alert(`Please wait ${waitTime}s before analyzing again (API quota limits)`);
+    return;
+  }
+
   const symbol    = document.getElementById('symbolInput').value.trim();
   const marketType = document.getElementById('marketType').value;
   const timeframe = document.getElementById('timeframe').value;
@@ -448,6 +461,7 @@ async function runAnalysis() {
     const result = safeParseJSON(data.text || '{}');
     if (!result || !result.signal) throw new Error('AI response missing analysis data. Check your API key.');
 
+    lastAnalysisTime = Date.now();
     clearInterval(ticker);
     document.getElementById('loadingWrap').style.display = 'none';
     updateMetrics(result);
@@ -462,7 +476,7 @@ async function runAnalysis() {
       <div class="placeholder-icon">⚠️</div>
       <h3>Analysis Error</h3>
       <p>${err.message}</p>
-      <p style="font-size:11px;color:var(--dim);margin-top:8px">Check that GEMINI_API_KEY is set in Vercel environment variables and the model name is correct.</p>`;
+      <p style="font-size:11px;color:var(--dim);margin-top:8px">For quota issues: upgrade to paid tier at <a href="https://ai.google.dev" target="_blank" style="color:var(--accent)">ai.google.dev</a></p>`;
   }
   btn.disabled = false;
 }
