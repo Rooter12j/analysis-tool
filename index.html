@@ -63,8 +63,8 @@
   .metric-sub{font-size:11px;color:var(--muted);margin-top:4px;}
 
   .chart-zone{padding:0 28px 16px;}
-  .chart-container{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;height:420px;overflow:hidden;position:relative;}
-  #tv_chart_inner{height:100%;}
+  .chart-container{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;height:420px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;}
+  .chart-container iframe{width:100%;height:100%;border:none;border-radius:10px;}
 
   .output-zone{flex:1;padding:0 28px 28px;display:flex;flex-direction:column;gap:16px;}
   .placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--dim);text-align:center;padding:60px 40px;}
@@ -137,7 +137,6 @@
   ::-webkit-scrollbar-track{background:transparent;}
   ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 </style>
-<script src="https://s3.tradingview.com/tv.js" onload="onTvJsReady()"></script>
 </head>
 <body>
 
@@ -154,17 +153,17 @@
   <aside class="sidebar">
     <div class="market-group">
       <div class="section-label">Forex Majors</div>
-      <div class="market-item active" data-symbol="EURUSD" data-type="Forex" data-tv="FX:EURUSD" data-name="Euro / US Dollar">
+      <div class="market-item active" data-symbol="EURUSD" data-type="Forex" data-tv="FX_IDC:EURUSD">
         <div class="market-dot" style="background:#0099FF"></div>
         <div class="market-info"><div class="market-symbol">EUR/USD</div><div class="market-name">Euro / US Dollar</div></div>
         <div class="market-chg bull">Live</div>
       </div>
-      <div class="market-item" data-symbol="GBPUSD" data-type="Forex" data-tv="FX:GBPUSD" data-name="British Pound / US Dollar">
+      <div class="market-item" data-symbol="GBPUSD" data-type="Forex" data-tv="FX_IDC:GBPUSD">
         <div class="market-dot" style="background:#0099FF"></div>
         <div class="market-info"><div class="market-symbol">GBP/USD</div><div class="market-name">British Pound / USD</div></div>
         <div class="market-chg bull">Live</div>
       </div>
-      <div class="market-item" data-symbol="USDJPY" data-type="Forex" data-tv="FX:USDJPY" data-name="US Dollar / Japanese Yen">
+      <div class="market-item" data-symbol="USDJPY" data-type="Forex" data-tv="FX_IDC:USDJPY">
         <div class="market-dot" style="background:#0099FF"></div>
         <div class="market-info"><div class="market-symbol">USD/JPY</div><div class="market-name">Dollar / Yen</div></div>
         <div class="market-chg bull">Live</div>
@@ -172,7 +171,7 @@
     </div>
     <div class="market-group">
       <div class="section-label">Commodities</div>
-      <div class="market-item" data-symbol="XAUUSD" data-type="Commodity" data-tv="OANDA:XAUUSD" data-name="Gold / US Dollar">
+      <div class="market-item" data-symbol="XAUUSD" data-type="Commodity" data-tv="FX_IDC:XAUUSD">
         <div class="market-dot" style="background:#FFB300"></div>
         <div class="market-info"><div class="market-symbol">XAU/USD</div><div class="market-name">Gold Spot</div></div>
         <div class="market-chg bull">Live</div>
@@ -180,28 +179,15 @@
     </div>
     <div class="market-group">
       <div class="section-label">Cryptocurrency</div>
-      <div class="market-item" data-symbol="BTCUSD" data-type="Crypto" data-tv="BINANCE:BTCUSDT" data-name="Bitcoin / USD">
+      <div class="market-item" data-symbol="BTCUSD" data-type="Crypto" data-tv="BITSTAMP:BTCUSD">
         <div class="market-dot" style="background:#F7931A"></div>
         <div class="market-info"><div class="market-symbol">BTC/USD</div><div class="market-name">Bitcoin Spot</div></div>
         <div class="market-chg bull">Live</div>
       </div>
-      <div class="market-item" data-symbol="SOLUSD" data-type="Crypto" data-tv="BINANCE:SOLUSDT" data-name="Solana / USD">
+      <div class="market-item" data-symbol="SOLUSD" data-type="Crypto" data-tv="BITSTAMP:SOLUSD">
         <div class="market-dot" style="background:#00E5A0"></div>
         <div class="market-info"><div class="market-symbol">SOL/USD</div><div class="market-name">Solana Spot</div></div>
         <div class="market-chg bull">Live</div>
-      </div>
-    </div>
-    <div class="market-group">
-      <div class="section-label">Binary / Synthetics</div>
-      <div class="market-item" data-symbol="Volatility 75 Index" data-type="Binary / Synthetic" data-tv="DERIV:V75" data-name="Volatility 75 Index">
-        <div class="market-dot" style="background:#00E5A0"></div>
-        <div class="market-info"><div class="market-symbol">Vol 75</div><div class="market-name">Deriv Synthetic</div></div>
-        <div class="market-chg neutral-c">Live</div>
-      </div>
-      <div class="market-item" data-symbol="Volatility 100 Index" data-type="Binary / Synthetic" data-tv="DERIV:V100" data-name="Volatility 100 Index">
-        <div class="market-dot" style="background:#00E5A0"></div>
-        <div class="market-info"><div class="market-symbol">Vol 100</div><div class="market-name">Deriv Synthetic</div></div>
-        <div class="market-chg neutral-c">Live</div>
       </div>
     </div>
   </aside>
@@ -220,12 +206,11 @@
             <option value="Forex">Forex</option>
             <option value="Commodity">Commodity</option>
             <option value="Crypto">Crypto</option>
-            <option value="Binary / Synthetic">Binary / Synthetic</option>
           </select>
         </div>
         <div class="field-group">
           <label>TIMEFRAME</label>
-          <select id="timeframe" onchange="debouncedRenderChart()">
+          <select id="timeframe" onchange="renderChart()">
             <option value="1">M1 — 1 Minute</option>
             <option value="5">M5 — 5 Minutes</option>
             <option value="15" selected>M15 — 15 Minutes</option>
@@ -275,7 +260,9 @@
     </div>
 
     <div class="chart-zone">
-      <div class="chart-container" id="chartWorkspace"></div>
+      <div class="chart-container" id="chartWorkspace">
+        Charts load below after analyzing...
+      </div>
     </div>
 
     <div class="output-zone">
@@ -295,11 +282,10 @@
 
 <script>
 // ── STATE ───────────────────────────────────────────────────────────
-let activeTvTicker = 'FX:EURUSD';
+let activeTicker = 'FX_IDC:EURUSD';
 let analysisHistory = [];
-let chartRenderTimeout;
 let lastAnalysisTime = 0;
-const ANALYSIS_COOLDOWN = 2000; // 2 seconds between requests
+const ANALYSIS_COOLDOWN = 2000;
 
 const LOADING_MSGS = [
   'FETCHING LIVE PRICE DATA...',
@@ -312,50 +298,21 @@ const LOADING_MSGS = [
   'FINALIZING ANALYSIS...',
 ];
 
-// ── CHART — Optimized rendering ───────────────────────────────────
+// ── CHART — Simple iframe embed ────────────────────────────────────
 function renderChart() {
   const tf = document.getElementById('timeframe').value;
-  // Clear container and add inner div for TradingView
-  document.getElementById('chartWorkspace').innerHTML = '<div id="tv_chart_inner"></div>';
+  const tfMap = { '1': '1', '5': '5', '15': '15', '60': '60', '240': '240', 'D': 'D' };
+  const interval = tfMap[tf] || '15';
   
-  if (_tvReady) {
-    setTimeout(() => {
-      new TradingView.widget({
-        autosize: true,
-        symbol: activeTvTicker,
-        interval: tf,
-        timezone: 'Africa/Nairobi',
-        theme: 'dark',
-        style: '1',
-        locale: 'en',
-        toolbar_bg: '#10131A',
-        hide_side_toolbar: false,
-        allow_symbol_change: true,
-        studies: ['RSI@tv-basicstudies', 'MACD@tv-basicstudies'],
-        container_id: 'tv_chart_inner',
-      });
-    }, 100);
-  }
+  document.getElementById('chartWorkspace').innerHTML = `
+    <iframe 
+      src="https://www.tradingview.com/embed/markets/crypto/?utm_medium=widget_new&utm_campaign=chart&utm_source=lean" 
+      style="width:100%;height:100%;border:none;border-radius:10px;"
+      allow="web-share"
+      allowfullscreen="">
+    </iframe>
+  `;
 }
-
-// Debounce chart renders to avoid rapid redraws
-function debouncedRenderChart() {
-  clearTimeout(chartRenderTimeout);
-  chartRenderTimeout = setTimeout(renderChart, 300);
-}
-
-// TradingView JS loader
-var _tvReady = false;
-var _domReady = false;
-function onTvJsReady() {
-  _tvReady = true;
-  if (_domReady) renderChart();
-}
-
-window.addEventListener('DOMContentLoaded', function() {
-  _domReady = true;
-  if (_tvReady) renderChart();
-});
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────
 document.querySelectorAll('.market-item').forEach(item => {
@@ -364,7 +321,7 @@ document.querySelectorAll('.market-item').forEach(item => {
     item.classList.add('active');
     document.getElementById('symbolInput').value = item.dataset.symbol;
     document.getElementById('marketType').value = item.dataset.type;
-    activeTvTicker = item.dataset.tv;
+    activeTicker = item.dataset.tv;
     renderChart();
   });
 });
@@ -446,7 +403,6 @@ async function runAnalysis() {
     if(el) el.textContent = LOADING_MSGS[mi];
   }, 800);
 
-  // Fetch live price first
   const livePrice = await fetchLivePrice(symbol, marketType);
 
   try {
@@ -614,6 +570,9 @@ function renderAnalysis(r, symbol, price) {
     if(fill) fill.style.width = (r.confidence || 0) + '%';
   }, 100);
 }
+
+// Initialize chart on load
+window.addEventListener('DOMContentLoaded', renderChart);
 </script>
 </body>
 </html>
