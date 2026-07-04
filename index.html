@@ -19,7 +19,7 @@
   header{display:flex;align-items:center;justify-content:space-between;padding:14px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100;}
   .logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:20px;letter-spacing:-0.5px;}
   .logo span{color:var(--accent);}
-  .header-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:4px;padding:2px 8px;letter-spacing:1px;}
+  .header-badge{font-family:'Space Mono',monospace;font-size:10px;color:var(--accent);background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);border-radius:4px;padding:2px 8px;letter-spacing:1px;text-transform:uppercase;}
   .header-right{display:flex;align-items:center;gap:12px;}
 
   .app{display:grid;grid-template-columns:280px 1fr;height:calc(100vh - 53px);}
@@ -48,10 +48,10 @@
   .input-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
   .field-group{display:flex;flex-direction:column;gap:6px;}
   .field-group label{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:0.5px;}
-  select,input[type="text"]{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:9px 12px;font-size:13px;font-family:'Space Grotesk',sans-serif;width:100%;outline:none;transition:border-color 0.2s;}
+  select,input[type="text"]{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:9px 12px;font-size:13px;font-family:'Space Grotesk',sans-serif;width:100%;}
   select:focus,input:focus{border-color:var(--accent2);}
   option{background:var(--surface2);}
-  .btn-analyze{background:var(--accent);color:#0A0C10;border:none;border-radius:6px;padding:10px 20px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:opacity 0.2s,transform 0.1s;letter-spacing:0.3px;}
+  .btn-analyze{background:var(--accent);color:#0A0C10;border:none;border-radius:6px;padding:10px 20px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;}
   .btn-analyze:hover{opacity:0.88;}
   .btn-analyze:active{transform:scale(0.98);}
   .btn-analyze:disabled{opacity:0.4;cursor:not-allowed;}
@@ -63,7 +63,8 @@
   .metric-sub{font-size:11px;color:var(--muted);margin-top:4px;}
 
   .chart-zone{padding:0 28px 16px;}
-  .chart-container{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;height:420px;overflow:hidden;}
+  .chart-container{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;height:420px;overflow:hidden;position:relative;}
+  .chart-loading{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;background:rgba(10,12,16,0.8);color:var(--muted);font-size:12px;z-index:10;}
 
   .output-zone{flex:1;padding:0 28px 28px;display:flex;flex-direction:column;gap:16px;}
   .placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--dim);text-align:center;padding:60px 40px;}
@@ -224,7 +225,7 @@
         </div>
         <div class="field-group">
           <label>TIMEFRAME</label>
-          <select id="timeframe" onchange="renderChart()">
+          <select id="timeframe" onchange="debouncedRenderChart()">
             <option value="1">M1 — 1 Minute</option>
             <option value="5">M5 — 5 Minutes</option>
             <option value="15" selected>M15 — 15 Minutes</option>
@@ -274,7 +275,9 @@
     </div>
 
     <div class="chart-zone">
-      <div class="chart-container" id="chartWorkspace"></div>
+      <div class="chart-container" id="chartWorkspace">
+        <div class="chart-loading">Loading chart...</div>
+      </div>
     </div>
 
     <div class="output-zone">
@@ -293,9 +296,10 @@
 </div>
 
 <script>
-// ── STATE ──────────────────────────────────────────────────────────────────
+// ── STATE ───────────────────────────────────────────────────────────
 let activeTvTicker = 'FX:EURUSD';
 let analysisHistory = [];
+let chartRenderTimeout;
 
 const LOADING_MSGS = [
   'FETCHING LIVE PRICE DATA...',
@@ -308,40 +312,49 @@ const LOADING_MSGS = [
   'FINALIZING ANALYSIS...',
 ];
 
-// ── CHART — exact pattern from working reference ───────────────────────────
+// ── CHART — Optimized rendering ───────────────────────────────────
 function renderChart() {
   const tf = document.getElementById('timeframe').value;
-  // Must clear container and give inner div a fresh id each time
   document.getElementById('chartWorkspace').innerHTML = '<div id="tv_chart_inner" style="height:100%"></div>';
-  new TradingView.widget({
-    autosize: true,
-    symbol: activeTvTicker,
-    interval: tf,
-    timezone: 'Africa/Nairobi',
-    theme: 'dark',
-    style: '1',
-    locale: 'en',
-    toolbar_bg: '#10131A',
-    hide_side_toolbar: false,
-    allow_symbol_change: true,
-    studies: ['RSI@tv-basicstudies', 'MACD@tv-basicstudies'],
-    container_id: 'tv_chart_inner',
-  });
+  
+  if (_tvReady) {
+    new TradingView.widget({
+      autosize: true,
+      symbol: activeTvTicker,
+      interval: tf,
+      timezone: 'Africa/Nairobi',
+      theme: 'dark',
+      style: '1',
+      locale: 'en',
+      toolbar_bg: '#10131A',
+      hide_side_toolbar: false,
+      allow_symbol_change: true,
+      studies: ['RSI@tv-basicstudies', 'MACD@tv-basicstudies'],
+      container_id: 'tv_chart_inner',
+    });
+  }
 }
 
-// tv.js fires onload — but DOM must also be ready. Handle both orders.
+// Debounce chart renders to avoid rapid redraws
+function debouncedRenderChart() {
+  clearTimeout(chartRenderTimeout);
+  chartRenderTimeout = setTimeout(renderChart, 300);
+}
+
+// TradingView JS loader
 var _tvReady = false;
 var _domReady = false;
 function onTvJsReady() {
   _tvReady = true;
   if (_domReady) renderChart();
 }
+
 window.addEventListener('DOMContentLoaded', function() {
   _domReady = true;
   if (_tvReady) renderChart();
 });
 
-// ── SIDEBAR ────────────────────────────────────────────────────────────────
+// ── SIDEBAR ───────────────────────────────────────────────────────────
 document.querySelectorAll('.market-item').forEach(item => {
   item.addEventListener('click', () => {
     document.querySelectorAll('.market-item').forEach(i => i.classList.remove('active'));
@@ -353,7 +366,7 @@ document.querySelectorAll('.market-item').forEach(item => {
   });
 });
 
-// ── LIVE PRICE ─────────────────────────────────────────────────────────────
+// ── LIVE PRICE ──────────────────────────────────────────────────────────
 async function fetchLivePrice(symbol, type) {
   const s = symbol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
   try {
@@ -377,7 +390,7 @@ async function fetchLivePrice(symbol, type) {
   return null;
 }
 
-// ── JSON PARSER ────────────────────────────────────────────────────────────
+// ── JSON PARSER ─────────────────────────────────────────────────────────
 function safeParseJSON(text) {
   const clean = text.replace(/```json|```/g, '').trim();
   try { return JSON.parse(clean); } catch(_) {}
@@ -399,7 +412,7 @@ function safeParseJSON(text) {
   try { return JSON.parse(j); } catch(_){ return null; }
 }
 
-// ── ANALYSIS ───────────────────────────────────────────────────────────────
+// ── ANALYSIS ──────────────────────────────────────────────────────────
 async function runAnalysis() {
   const symbol    = document.getElementById('symbolInput').value.trim();
   const marketType = document.getElementById('marketType').value;
@@ -424,10 +437,6 @@ async function runAnalysis() {
   // Fetch live price first
   const livePrice = await fetchLivePrice(symbol, marketType);
 
-  const priceCtx = livePrice
-    ? `CRITICAL — LIVE PRICE RIGHT NOW: ${symbol} = ${livePrice}. ALL levels (entry, stop loss, take profits) MUST be anchored to this exact price. Do not use historical or made-up prices.`
-    : `Use a realistic current price estimate for ${symbol} and state it in currentPrice.`;
-
   try {
     const res = await fetch('/api/analyze', {
       method: 'POST',
@@ -437,7 +446,7 @@ async function runAnalysis() {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
     const result = safeParseJSON(data.text || '{}');
-    if (!result) throw new Error('Could not parse AI response. Try again.');
+    if (!result || !result.signal) throw new Error('AI response missing analysis data. Check your API key.');
 
     clearInterval(ticker);
     document.getElementById('loadingWrap').style.display = 'none';
@@ -453,7 +462,7 @@ async function runAnalysis() {
       <div class="placeholder-icon">⚠️</div>
       <h3>Analysis Error</h3>
       <p>${err.message}</p>
-      <p style="font-size:11px;color:var(--dim);margin-top:8px">Ensure GEMINI_API_KEY is set in Vercel environment variables.</p>`;
+      <p style="font-size:11px;color:var(--dim);margin-top:8px">Check that GEMINI_API_KEY is set in Vercel environment variables and the model name is correct.</p>`;
   }
   btn.disabled = false;
 }
@@ -461,16 +470,16 @@ async function runAnalysis() {
 function updateMetrics(r) {
   document.getElementById('metricsBar').style.display = 'grid';
   const sEl = document.getElementById('m-signal');
-  sEl.textContent = r.signal;
+  sEl.textContent = r.signal || '—';
   sEl.className = 'metric-val '+(r.signal==='BUY'?'bull':r.signal==='SELL'?'bear':'neutral-c');
   const cEl = document.getElementById('m-conf');
   cEl.textContent = (r.confidence||0)+'%';
   cEl.className = 'metric-val '+(r.confidence>=70?'bull':r.confidence>=50?'neutral-c':'bear');
   const tEl = document.getElementById('m-trend');
-  tEl.textContent = r.trend;
+  tEl.textContent = r.trend || '—';
   tEl.className = 'metric-val '+(r.trend==='BULLISH'?'bull':r.trend==='BEARISH'?'bear':'neutral-c');
-  document.getElementById('m-vol').textContent = r.volatility;
-  document.getElementById('m-rr').textContent = r.riskReward;
+  document.getElementById('m-vol').textContent = r.volatility || '—';
+  document.getElementById('m-rr').textContent = r.riskReward || '—';
 }
 
 function renderAnalysis(r, symbol, price) {
@@ -513,10 +522,10 @@ function renderAnalysis(r, symbol, price) {
         <div class="signal-big">
           <div class="signal-icon ${sbg}">${icon}</div>
           <div class="signal-text">
-            <div class="signal-direction ${sc}">${r.signal}</div>
+            <div class="signal-direction ${sc}">${r.signal || 'NEUTRAL'}</div>
             <div class="signal-sub">${r.marketBias||''}</div>
             <div class="confidence-bar"><div class="confidence-fill" style="width:0%;background:${ccol}"></div></div>
-            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:5px">CONFIDENCE: ${r.confidence}%</div>
+            <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);margin-top:5px">CONFIDENCE: ${r.confidence || 0}%</div>
           </div>
         </div>
       </div>
@@ -528,12 +537,12 @@ function renderAnalysis(r, symbol, price) {
         </div>
         <div class="card-body">
           <div class="levels-grid">
-            <div class="level-box"><div class="level-tag">Entry Zone</div><div class="level-price">${r.entryZone}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bear)">Stop Loss</div><div class="level-price" style="color:var(--bear)">${r.stopLoss}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 1</div><div class="level-price" style="color:var(--bull)">${r.takeProfit1}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 2</div><div class="level-price" style="color:var(--bull)">${r.takeProfit2}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 3</div><div class="level-price" style="color:var(--bull)">${r.takeProfit3}</div></div>
-            <div class="level-box"><div class="level-tag" style="color:var(--accent2)">R:R</div><div class="level-price" style="color:var(--accent2)">${r.riskReward}</div></div>
+            <div class="level-box"><div class="level-tag">Entry Zone</div><div class="level-price">${r.entryZone || '—'}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bear)">Stop Loss</div><div class="level-price" style="color:var(--bear)">${r.stopLoss || '—'}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 1</div><div class="level-price" style="color:var(--bull)">${r.takeProfit1 || '—'}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 2</div><div class="level-price" style="color:var(--bull)">${r.takeProfit2 || '—'}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--bull)">TP 3</div><div class="level-price" style="color:var(--bull)">${r.takeProfit3 || '—'}</div></div>
+            <div class="level-box"><div class="level-tag" style="color:var(--accent2)">R:R</div><div class="level-price" style="color:var(--accent2)">${r.riskReward || '—'}</div></div>
           </div>
         </div>
       </div>
@@ -541,10 +550,10 @@ function renderAnalysis(r, symbol, price) {
       <div class="card">
         <div class="card-header"><div class="card-title">📋 Market Analysis</div></div>
         <div class="card-body prose-section">
-          <div class="prose-block"><strong>Price Action:</strong> ${r.priceAction||''}</div>
-          <div class="prose-block"><strong>Key Levels:</strong> ${r.keyLevels||''}</div>
-          <div class="prose-block"><strong>Trade Scenario:</strong> ${r.tradeScenario||''}</div>
-          <div class="prose-block"><strong>Session Context:</strong> ${r.sessionContext||''}</div>
+          <div class="prose-block"><strong>Price Action:</strong> ${r.priceAction||'—'}</div>
+          <div class="prose-block"><strong>Key Levels:</strong> ${r.keyLevels||'—'}</div>
+          <div class="prose-block"><strong>Trade Scenario:</strong> ${r.tradeScenario||'—'}</div>
+          <div class="prose-block"><strong>Session Context:</strong> ${r.sessionContext||'—'}</div>
         </div>
       </div>
 
@@ -555,7 +564,7 @@ function renderAnalysis(r, symbol, price) {
           <div class="card-title" style="color:var(--bear)">⚠️ Risk Warning</div>
         </div>
         <div class="card-body">
-          <div class="prose-block" style="color:var(--muted)">${r.riskWarning||''}</div>
+          <div class="prose-block" style="color:var(--muted)">${r.riskWarning||'—'}</div>
           <div style="margin-top:10px;padding:10px;background:rgba(255,77,106,0.05);border-radius:6px;font-size:11px;color:var(--dim);line-height:1.6">
             <strong style="color:var(--bear)">Disclaimer:</strong> AI-generated analysis for educational purposes only. Apply your own judgment and risk management. Never risk more than you can afford to lose.
           </div>
@@ -566,16 +575,16 @@ function renderAnalysis(r, symbol, price) {
     <div class="analysis-right">
       <div class="card">
         <div class="card-header"><div class="card-title">📡 Technical Indicators</div></div>
-        <div class="card-body"><div class="indicator-list">${indRows}</div></div>
+        <div class="card-body"><div class="indicator-list">${indRows || '<div style="color:var(--dim);font-size:12px">No indicators</div>'}</div></div>
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">🛡️ Risk Parameters</div></div>
         <div class="card-body">
           <div class="risk-grid">
-            <div class="risk-item"><div class="risk-label">Trend</div><div class="risk-val ${r.trend==='BULLISH'?'bull':r.trend==='BEARISH'?'bear':'neutral-c'}">${r.trend}</div></div>
-            <div class="risk-item"><div class="risk-label">Volatility</div><div class="risk-val">${r.volatility}</div></div>
-            <div class="risk-item"><div class="risk-label">Confidence</div><div class="risk-val" style="color:${ccol}">${r.confidence}%</div></div>
-            <div class="risk-item"><div class="risk-label">R:R Ratio</div><div class="risk-val bull">${r.riskReward}</div></div>
+            <div class="risk-item"><div class="risk-label">Trend</div><div class="risk-val ${r.trend==='BULLISH'?'bull':r.trend==='BEARISH'?'bear':'neutral-c'}">${r.trend || '—'}</div></div>
+            <div class="risk-item"><div class="risk-label">Volatility</div><div class="risk-val">${r.volatility || '—'}</div></div>
+            <div class="risk-item"><div class="risk-label">Confidence</div><div class="risk-val" style="color:${ccol}">${r.confidence || 0}%</div></div>
+            <div class="risk-item"><div class="risk-label">R:R Ratio</div><div class="risk-val bull">${r.riskReward || '—'}</div></div>
           </div>
         </div>
       </div>
@@ -589,7 +598,7 @@ function renderAnalysis(r, symbol, price) {
   document.getElementById('analysisResult').style.display = 'grid';
   setTimeout(() => {
     const fill = document.querySelector('.confidence-fill');
-    if(fill) fill.style.width = r.confidence + '%';
+    if(fill) fill.style.width = (r.confidence || 0) + '%';
   }, 100);
 }
 </script>
