@@ -43,28 +43,28 @@
   .main::-webkit-scrollbar{width:4px;}
   .main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 
-  .input-zone{padding:24px 28px 0;background:var(--bg);}
+  .input-zone{padding:24px 28px 16px;background:var(--bg);}
   .input-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--muted);margin-bottom:10px;text-transform:uppercase;}
   .input-row{display:grid;grid-template-columns:1fr 1fr 1fr 1fr auto;gap:10px;align-items:end;}
   .field-group{display:flex;flex-direction:column;gap:6px;}
   .field-group label{font-size:11px;color:var(--muted);font-family:'Space Mono',monospace;letter-spacing:0.5px;}
   select,input[type="text"]{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:9px 12px;font-size:13px;font-family:'Space Grotesk',sans-serif;width:100%;}
-  select:focus,input:focus{border-color:var(--accent2);}
+  select:focus,input:focus{border-color:var(--accent2);outline:none;}
   option{background:var(--surface2);}
   .btn-analyze{background:var(--accent);color:#0A0C10;border:none;border-radius:6px;padding:10px 20px;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap;transition:opacity 0.2s;}
   .btn-analyze:hover{opacity:0.88;}
   .btn-analyze:active{transform:scale(0.98);}
   .btn-analyze:disabled{opacity:0.4;cursor:not-allowed;}
 
-  .metrics-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:16px 28px;}
+  .metrics-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;padding:0 28px 16px;}
   .metric-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;}
   .metric-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase;margin-bottom:6px;}
   .metric-val{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;line-height:1;}
   .metric-sub{font-size:11px;color:var(--muted);margin-top:4px;}
 
   .chart-zone{padding:0 28px 16px;}
-  .chart-container{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;height:420px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;}
-  .chart-container iframe{width:100%;height:100%;border:none;border-radius:10px;}
+  .chart-container{background:var(--surface);border:1px solid var(--border);border-radius:10px;width:100%;height:420px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px;overflow:hidden;}
+  .chart-container .tradingview-widget-container{width:100%;height:100%;}
 
   .output-zone{flex:1;padding:0 28px 28px;display:flex;flex-direction:column;gap:16px;}
   .placeholder{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;color:var(--dim);text-align:center;padding:60px 40px;}
@@ -102,7 +102,7 @@
   .prose-block strong{color:var(--accent);font-weight:600;}
 
   .indicator-list{display:flex;flex-direction:column;gap:8px;}
-  .indicator-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--surface2);border-radius:6px;}
+  .indicator-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px;background:var(--surface2);border-radius:6px;}
   .ind-name{font-size:12px;color:var(--muted);}
   .ind-val{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;}
   .ind-signal{font-size:10px;padding:2px 8px;border-radius:4px;font-weight:600;letter-spacing:0.5px;}
@@ -127,7 +127,7 @@
   .h-time{font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);margin-left:auto;}
 
   @media(max-width:900px){
-    .app{grid-template-columns:1fr;}
+    .app{grid-template-columns:1fr;height:auto;}
     .sidebar{display:none;}
     .input-row{grid-template-columns:1fr 1fr;}
     .analysis-wrap{grid-template-columns:1fr;}
@@ -153,17 +153,17 @@
   <aside class="sidebar">
     <div class="market-group">
       <div class="section-label">Forex Majors</div>
-      <div class="market-item active" data-symbol="EURUSD" data-type="Forex" data-tv="FX_IDC:EURUSD">
+      <div class="market-item active" data-symbol="EURUSD" data-type="Forex" data-tv="OANDA:EURUSD">
         <div class="market-dot" style="background:#0099FF"></div>
         <div class="market-info"><div class="market-symbol">EUR/USD</div><div class="market-name">Euro / US Dollar</div></div>
         <div class="market-chg bull">Live</div>
       </div>
-      <div class="market-item" data-symbol="GBPUSD" data-type="Forex" data-tv="FX_IDC:GBPUSD">
+      <div class="market-item" data-symbol="GBPUSD" data-type="Forex" data-tv="OANDA:GBPUSD">
         <div class="market-dot" style="background:#0099FF"></div>
         <div class="market-info"><div class="market-symbol">GBP/USD</div><div class="market-name">British Pound / USD</div></div>
         <div class="market-chg bull">Live</div>
       </div>
-      <div class="market-item" data-symbol="USDJPY" data-type="Forex" data-tv="FX_IDC:USDJPY">
+      <div class="market-item" data-symbol="USDJPY" data-type="Forex" data-tv="OANDA:USDJPY">
         <div class="market-dot" style="background:#0099FF"></div>
         <div class="market-info"><div class="market-symbol">USD/JPY</div><div class="market-name">Dollar / Yen</div></div>
         <div class="market-chg bull">Live</div>
@@ -171,7 +171,7 @@
     </div>
     <div class="market-group">
       <div class="section-label">Commodities</div>
-      <div class="market-item" data-symbol="XAUUSD" data-type="Commodity" data-tv="FX_IDC:XAUUSD">
+      <div class="market-item" data-symbol="XAUUSD" data-type="Commodity" data-tv="OANDA:XAUUSD">
         <div class="market-dot" style="background:#FFB300"></div>
         <div class="market-info"><div class="market-symbol">XAU/USD</div><div class="market-name">Gold Spot</div></div>
         <div class="market-chg bull">Live</div>
@@ -184,7 +184,7 @@
         <div class="market-info"><div class="market-symbol">BTC/USD</div><div class="market-name">Bitcoin Spot</div></div>
         <div class="market-chg bull">Live</div>
       </div>
-      <div class="market-item" data-symbol="SOLUSD" data-type="Crypto" data-tv="BITSTAMP:SOLUSD">
+      <div class="market-item" data-symbol="SOLUSD" data-type="Crypto" data-tv="COINBASE:SOLUSD">
         <div class="market-dot" style="background:#00E5A0"></div>
         <div class="market-info"><div class="market-symbol">SOL/USD</div><div class="market-name">Solana Spot</div></div>
         <div class="market-chg bull">Live</div>
@@ -261,7 +261,7 @@
 
     <div class="chart-zone">
       <div class="chart-container" id="chartWorkspace">
-        Charts load below after analyzing...
+        Loading chart...
       </div>
     </div>
 
@@ -282,10 +282,17 @@
 
 <script>
 // ── STATE ───────────────────────────────────────────────────────────
-let activeTicker = 'FX_IDC:EURUSD';
+let activeTicker = 'OANDA:EURUSD';
 let analysisHistory = [];
 let lastAnalysisTime = 0;
 const ANALYSIS_COOLDOWN = 2000;
+
+// Maps typed symbols to TradingView feeds that work in the free widget
+const TV_MAP = {
+  EURUSD: 'OANDA:EURUSD', GBPUSD: 'OANDA:GBPUSD', USDJPY: 'OANDA:USDJPY',
+  XAUUSD: 'OANDA:XAUUSD', BTCUSD: 'BITSTAMP:BTCUSD', ETHUSD: 'BITSTAMP:ETHUSD',
+  SOLUSD: 'COINBASE:SOLUSD'
+};
 
 const LOADING_MSGS = [
   'FETCHING LIVE PRICE DATA...',
@@ -298,7 +305,7 @@ const LOADING_MSGS = [
   'FINALIZING ANALYSIS...',
 ];
 
-// ── CHART — Simple iframe embed ────────────────────────────────────
+// ── CHART — TradingView Advanced Chart widget ───────────────────────
 function renderChart() {
   const tf = document.getElementById('timeframe').value;
   const container = document.getElementById('chartWorkspace');
@@ -365,7 +372,7 @@ async function fetchLivePrice(symbol, type) {
       const d = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${bSym}`).then(r => r.json());
       return parseFloat(d.price).toFixed(2);
     }
-  } catch(e) {}
+  } catch(e) { console.warn('Live price fetch failed:', e); }
   return null;
 }
 
@@ -387,32 +394,33 @@ function safeParseJSON(text) {
   }
   if(str)j+='"';
   j+=']'.repeat(Math.max(0,br));
-  j+='}'. repeat(Math.max(0,b));
+  j+='}'.repeat(Math.max(0,b));
   try { return JSON.parse(j); } catch(_){ return null; }
 }
 
 // ── ANALYSIS with Rate Limiting ──────────────────────────────────────────
 async function runAnalysis() {
-  const tvMap = {
-  EURUSD:'OANDA:EURUSD', GBPUSD:'OANDA:GBPUSD', USDJPY:'OANDA:USDJPY',
-  XAUUSD:'OANDA:XAUUSD', BTCUSD:'BITSTAMP:BTCUSD', ETHUSD:'BITSTAMP:ETHUSD', SOLUSD:'COINBASE:SOLUSD'
-};
-const key = symbol.replace(/[^a-zA-Z0-9]/g,'').toUpperCase();
-if (tvMap[key]) { activeTicker = tvMap[key]; renderChart(); }
   const now = Date.now();
   const timeSinceLastRequest = now - lastAnalysisTime;
-  
+
   if (timeSinceLastRequest < ANALYSIS_COOLDOWN) {
     const waitTime = Math.ceil((ANALYSIS_COOLDOWN - timeSinceLastRequest) / 1000);
     alert(`Please wait ${waitTime}s before analyzing again (API quota limits)`);
     return;
   }
 
-  const symbol    = document.getElementById('symbolInput').value.trim();
+  const symbol     = document.getElementById('symbolInput').value.trim();
   const marketType = document.getElementById('marketType').value;
-  const timeframe = document.getElementById('timeframe').value;
+  const timeframe  = document.getElementById('timeframe').value;
   const tradeStyle = document.getElementById('tradeStyle').value;
   if (!symbol) { alert('Please enter a symbol.'); return; }
+
+  // Sync the chart with the typed symbol (after `symbol` is defined)
+  const key = symbol.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  if (TV_MAP[key] && TV_MAP[key] !== activeTicker) {
+    activeTicker = TV_MAP[key];
+    renderChart();
+  }
 
   const btn = document.getElementById('analyzeBtn');
   btn.disabled = true;
@@ -420,6 +428,7 @@ if (tvMap[key]) { activeTicker = tvMap[key]; renderChart(); }
   document.getElementById('analysisResult').style.display = 'none';
   document.getElementById('metricsBar').style.display = 'none';
   document.getElementById('loadingWrap').style.display = 'flex';
+  document.getElementById('loadingWrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
   let mi = 0;
   const ticker = setInterval(() => {
@@ -428,35 +437,43 @@ if (tvMap[key]) { activeTicker = tvMap[key]; renderChart(); }
     if(el) el.textContent = LOADING_MSGS[mi];
   }, 800);
 
-  const livePrice = await fetchLivePrice(symbol, marketType);
-
   try {
+    const livePrice = await fetchLivePrice(symbol, marketType);
+
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ symbol, marketType, timeframe, tradeStyle, livePrice }),
     });
-    const data = await res.json();
+
+    let data;
+    try { data = await res.json(); }
+    catch(_) { throw new Error(`Server returned an invalid response (HTTP ${res.status}). Check that api/analyze.js is deployed.`); }
+
     if (data.error) throw new Error(data.error);
     const result = safeParseJSON(data.text || '{}');
-    if (!result || !result.signal) throw new Error('AI response missing analysis data. Check your API key.');
+    if (!result || !result.signal) throw new Error('AI response missing analysis data. Check your API key and model name.');
 
     lastAnalysisTime = Date.now();
     clearInterval(ticker);
     document.getElementById('loadingWrap').style.display = 'none';
-    updateMetrics(result);
-    renderAnalysis(result, symbol, livePrice);
     analysisHistory.unshift({ symbol, dir: result.signal, time: new Date().toLocaleTimeString() });
     if (analysisHistory.length > 10) analysisHistory.pop();
+    updateMetrics(result);
+    renderAnalysis(result, symbol, livePrice);
+    document.getElementById('analysisResult').scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch(err) {
+    console.error(err);
     clearInterval(ticker);
     document.getElementById('loadingWrap').style.display = 'none';
-    document.getElementById('placeholder').style.display = 'flex';
-    document.getElementById('placeholder').innerHTML = `
+    const ph = document.getElementById('placeholder');
+    ph.style.display = 'flex';
+    ph.innerHTML = `
       <div class="placeholder-icon">⚠️</div>
       <h3>Analysis Error</h3>
       <p>${err.message}</p>
       <p style="font-size:11px;color:var(--dim);margin-top:8px">For quota issues: upgrade to paid tier at <a href="https://ai.google.dev" target="_blank" style="color:var(--accent)">ai.google.dev</a></p>`;
+    ph.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
   btn.disabled = false;
 }
