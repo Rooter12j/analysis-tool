@@ -6,23 +6,29 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
+const TF_LABELS = {
+  '1': '1-minute', '5': '5-minute', '15': '15-minute',
+  '60': '1-hour', '240': '4-hour', 'D': 'daily',
+};
+
+const json = (body, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status, headers: { 'Content-Type': 'application/json', ...CORS },
+  });
+
 export default async function handler(req) {
   if (req.method === 'OPTIONS') return new Response(null, { headers: CORS });
-  if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
-      status: 405, headers: { 'Content-Type': 'application/json', ...CORS },
-    });
-  }
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return new Response(JSON.stringify({ error: 'GEMINI_API_KEY not set in Vercel environment variables.' }), {
-      status: 500, headers: { 'Content-Type': 'application/json', ...CORS },
-    });
-  }
+  if (!apiKey) return json({ error: 'GEMINI_API_KEY not set in Vercel environment variables.' }, 500);
+
+  // Change the model in Vercel settings instead of editing code
+  const model = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 
   try {
     const { symbol, marketType, timeframe, tradeStyle, livePrice, change } = await req.json();
+    const tfLabel = TF_LABELS[timeframe] || `${timeframe}-minute`;
 
     const priceCtx = livePrice
       ? `CRITICAL — LIVE REAL-TIME PRICE: ${symbol} is currently trading at EXACTLY ${livePrice} (fetched live seconds ago).
@@ -35,7 +41,7 @@ Respond ONLY with a single valid JSON object. No markdown fences, no commentary 
 
 ${priceCtx}
 
-Analyze ${symbol} (${marketType}) on the ${timeframe}-minute timeframe for a ${tradeStyle} trader.
+Analyze ${symbol} (${marketType}) on the ${tfLabel} timeframe for a ${tradeStyle} trader.
 ${change ? `24h change: ${change}%` : ''}
 
 Return this exact JSON structure (all fields required):
@@ -69,42 +75,33 @@ Return this exact JSON structure (all fields required):
   "resistanceLevel": "<one key resistance price near current price>"
 }`;
 
-    // Gemini 2.0 Flash — free tier, fast
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-    const response = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.4,
-          maxOutputTokens: 1500,
-          responseMimeType: 'application/json',   // forces Gemini to return pure JSON
-        },
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.4,
+            maxOutputTokens: 4096,
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    );
 
     const data = await response.json();
-
     if (!response.ok) {
-      const msg = data?.error?.message || 'Gemini API error';
-      return new Response(JSON.stringify({ error: msg }), {
-        status: response.status, headers: { 'Content-Type': 'application/json', ...CORS },
-      });
+      return json({ error: data?.error?.message || 'Gemini API error' }, response.status);
     }
 
-    // Extract text from Gemini response
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+    // Join all text parts (newer models can return more than one part)
+    const text = (data?.candidates?.[0]?.content?.parts || [])
+      .map(p => p.text || '').join('') || '{}';
 
-    return new Response(JSON.stringify({ text }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', ...CORS },
-    });
-
+    return json({ text });
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), {
-      status: 500, headers: { 'Content-Type': 'application/json', ...CORS },
-    });
+    return json({ error: err.message }, 500);
   }
 }
