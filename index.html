@@ -301,17 +301,36 @@ const LOADING_MSGS = [
 // ── CHART — Simple iframe embed ────────────────────────────────────
 function renderChart() {
   const tf = document.getElementById('timeframe').value;
-  const tfMap = { '1': '1', '5': '5', '15': '15', '60': '60', '240': '240', 'D': 'D' };
-  const interval = tfMap[tf] || '15';
-  
-  document.getElementById('chartWorkspace').innerHTML = `
-    <iframe 
-      src="https://www.tradingview.com/embed/markets/crypto/?utm_medium=widget_new&utm_campaign=chart&utm_source=lean" 
-      style="width:100%;height:100%;border:none;border-radius:10px;"
-      allow="web-share"
-      allowfullscreen="">
-    </iframe>
-  `;
+  const container = document.getElementById('chartWorkspace');
+  container.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'tradingview-widget-container';
+  wrap.style.cssText = 'width:100%;height:100%;';
+
+  const inner = document.createElement('div');
+  inner.className = 'tradingview-widget-container__widget';
+  inner.style.cssText = 'width:100%;height:100%;';
+  wrap.appendChild(inner);
+
+  const s = document.createElement('script');
+  s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+  s.async = true;
+  s.text = JSON.stringify({
+    autosize: true,
+    symbol: activeTicker,
+    interval: tf,
+    timezone: 'Etc/UTC',
+    theme: 'dark',
+    style: '1',
+    locale: 'en',
+    backgroundColor: '#10131A',
+    allow_symbol_change: true,
+    hide_side_toolbar: false,
+    support_host: 'https://www.tradingview.com'
+  });
+  wrap.appendChild(s);
+  container.appendChild(wrap);
 }
 
 // ── SIDEBAR ───────────────────────────────────────────────────────────
