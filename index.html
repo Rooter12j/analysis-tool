@@ -393,6 +393,12 @@ function safeParseJSON(text) {
 
 // ── ANALYSIS with Rate Limiting ──────────────────────────────────────────
 async function runAnalysis() {
+  const tvMap = {
+  EURUSD:'OANDA:EURUSD', GBPUSD:'OANDA:GBPUSD', USDJPY:'OANDA:USDJPY',
+  XAUUSD:'OANDA:XAUUSD', BTCUSD:'BITSTAMP:BTCUSD', ETHUSD:'BITSTAMP:ETHUSD', SOLUSD:'COINBASE:SOLUSD'
+};
+const key = symbol.replace(/[^a-zA-Z0-9]/g,'').toUpperCase();
+if (tvMap[key]) { activeTicker = tvMap[key]; renderChart(); }
   const now = Date.now();
   const timeSinceLastRequest = now - lastAnalysisTime;
   
